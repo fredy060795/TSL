@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSL – Tactical Situation Log</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1a1c1a;
+      --panel:    #23271f;
+      --border:   #3a4030;
+      --accent:   #6a8a3a;
+      --accent2:  #4e6a28;
+      --text:     #d4d8c8;
+      --text-dim: #7a8468;
+      --red:      #c0392b;
+      --blue:     #2e6da4;
+      --orange:   #c0721a;
+      --green:    #4a7a2a;
+      --row-even: #1e221a;
+      --row-odd:  #23271f;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--panel);
+      border-bottom: 2px solid var(--accent);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 16px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+    .clock {
+      margin-left: auto;
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      flex: 1;
+      gap: 0;
+    }
+
+    /* ── Unit Sidebar ── */
+    .sidebar {
+      width: 200px;
+      min-width: 160px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 10px;
+      gap: 8px;
+    }
+    .sidebar h2 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 4px;
+    }
+    .unit-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .unit-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px;
+      border-radius: 3px;
+      cursor: default;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .unit-list li:hover { background: #2d3228; }
+    .unit-list li .unit-name { flex: 1; }
+    .unit-list li .btn-del-unit {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .unit-list li .btn-del-unit:hover { color: var(--red); }
+
+    .add-unit-form {
+      display: flex;
+      gap: 4px;
+    }
+    .add-unit-form input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 6px;
+      font-family: inherit;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .add-unit-form input:focus { outline: none; border-color: var(--accent); }
+    .btn-add-unit {
+      background: var(--accent2);
+      border: none;
+      color: #fff;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .btn-add-unit:hover { background: var(--accent); }
+
+    /* ── Main Content ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    /* ── Entry Form ── */
+    .entry-form {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 14px;
+    }
+    .entry-form h2 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .form-group label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .form-group select,
+    .form-group input[type="text"],
+    .form-group input[type="time"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 8px;
+      font-family: inherit;
+      font-size: 12px;
+      border-radius: 3px;
+      min-width: 0;
+    }
+    .form-group select:focus,
+    .form-group input:focus { outline: none; border-color: var(--accent); }
+
+    .fg-von   { flex: 0 0 130px; }
+    .fg-an    { flex: 0 0 130px; }
+    .fg-art   { flex: 0 0 160px; }
+    .fg-inhalt { flex: 1 1 200px; }
+    .fg-zeit  { flex: 0 0 90px; }
+
+    .btn-log {
+      background: var(--accent2);
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 6px 18px;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      align-self: flex-end;
+      white-space: nowrap;
+    }
+    .btn-log:hover { background: var(--accent); }
+
+    .btn-reset {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      align-self: flex-end;
+    }
+    .btn-reset:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Log Table ── */
+    .log-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .log-header h2 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .log-count {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .btn-clear-log {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-left: 8px;
+    }
+    .btn-clear-log:hover { border-color: var(--red); color: var(--red); }
+    .btn-export {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+    .btn-export:hover { border-color: var(--accent); color: var(--accent); }
+
+    .table-wrap {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      background: #1e2218;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 6px 10px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even)  { background: var(--row-even); }
+    tbody tr:nth-child(odd)   { background: var(--row-odd); }
+    tbody tr:hover { background: #2a2f22; }
+
+    tbody td {
+      padding: 5px 10px;
+      border-bottom: 1px solid #252820;
+      vertical-align: middle;
+    }
+    .td-nr    { width: 42px; color: var(--text-dim); text-align: center; }
+    .td-zeit  { width: 68px; white-space: nowrap; }
+    .td-von   { width: 110px; }
+    .td-an    { width: 110px; }
+    .td-art   { width: 130px; }
+    .td-inhalt { }
+    .td-del   { width: 36px; text-align: center; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .badge-anforderung { background: #1e3a5a; color: #7ab4e8; }
+    .badge-truppen     { background: #1a3a1a; color: #7ad07a; }
+    .badge-feind       { background: #4a1a1a; color: #e87a7a; }
+    .badge-meldung     { background: #3a3010; color: #d4b868; }
+    .badge-sonstiges   { background: #2a2a2a; color: #aaaaaa; }
+
+    .btn-del-row {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    .btn-del-row:hover { background: #3a1a1a; color: var(--red); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-dim);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>TSL &mdash; Tactical Situation Log</h1>
+    <div class="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+  </div>
+  <div class="clock" id="clock">00:00:00</div>
+</header>
+
+<div class="layout">
+
+  <!-- Unit Sidebar -->
+  <aside class="sidebar">
+    <h2>Einheiten</h2>
+    <ul class="unit-list" id="unitList"></ul>
+    <div class="add-unit-form">
+      <input type="text" id="newUnitInput" placeholder="Einheit…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddUnit" title="Einheit hinzufügen">+</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Entry Form -->
+    <div class="entry-form">
+      <h2>Neuer Eintrag</h2>
+      <div class="form-row">
+
+        <div class="form-group fg-zeit">
+          <label>Zeit</label>
+          <input type="time" id="fZeit" />
+        </div>
+
+        <div class="form-group fg-von">
+          <label>Von</label>
+          <select id="fVon">
+            <option value="">– Von –</option>
+          </select>
+        </div>
+
+        <div class="form-group fg-an">
+          <label>An</label>
+          <select id="fAn">
+            <option value="">– An –</option>
+          </select>
+        </div>
+
+        <div class="form-group fg-art">
+          <label>Art</label>
+          <select id="fArt">
+            <option value="Anforderung">Anforderung</option>
+            <option value="Truppenmeldung">Truppenmeldung</option>
+            <option value="Feindmeldung">Feindmeldung</option>
+            <option value="Meldung">Meldung</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </div>
+
+        <div class="form-group fg-inhalt">
+          <label>Inhalt</label>
+          <input type="text" id="fInhalt" placeholder="Meldungsinhalt…" maxlength="200" />
+        </div>
+
+        <button class="btn-log" id="btnLog">Eintragen</button>
+        <button class="btn-reset" id="btnReset" title="Formular zurücksetzen">↺</button>
+      </div>
+    </div>
+
+    <!-- Log Table -->
+    <div class="log-section">
+      <div class="log-header">
+        <h2>Lagetagebuch</h2>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span class="log-count" id="logCount">0 Einträge</span>
+          <button class="btn-export" id="btnExport" title="Als CSV exportieren">⬇ Export</button>
+          <button class="btn-clear-log" id="btnClear" title="Alle Einträge löschen">✕ Leeren</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="logTable">
+          <thead>
+            <tr>
+              <th class="td-nr">Nr</th>
+              <th class="td-zeit">Zeit</th>
+              <th class="td-von">Von</th>
+              <th class="td-an">An</th>
+              <th class="td-art">Art</th>
+              <th class="td-inhalt">Inhalt</th>
+              <th class="td-del"></th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <tr><td colspan="7" class="empty-state">Noch keine Einträge vorhanden.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* ── State ── */
+  const DEFAULT_UNITS = ['FüGr', 'Zug 1', 'Zug 2', 'Zug 3', 'San', 'Kp', 'Btl', 'Lage'];
+  let units = [];
+  let log   = [];
+
+  /* ── Persist ── */
+  function save() {
+    localStorage.setItem('tsl_units', JSON.stringify(units));
+    localStorage.setItem('tsl_log',   JSON.stringify(log));
+  }
+  function load() {
+    try {
+      const parsedUnits = JSON.parse(localStorage.getItem('tsl_units'));
+      units = parsedUnits !== null ? parsedUnits : DEFAULT_UNITS.slice();
+    }
+    catch(e) { units = DEFAULT_UNITS.slice(); }
+    try {
+      const parsedLog = JSON.parse(localStorage.getItem('tsl_log'));
+      log = parsedLog !== null ? parsedLog : [];
+    }
+    catch(e) { log = []; }
+  }
+
+  /* ── Clock ── */
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      String(now.getHours()).padStart(2,'0') + ':' +
+      String(now.getMinutes()).padStart(2,'0') + ':' +
+      String(now.getSeconds()).padStart(2,'0');
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
+  function nowTime() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  /* ── Render units ── */
+  function renderUnits() {
+    const list = document.getElementById('unitList');
+    list.innerHTML = '';
+    units.forEach((u, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="unit-name">${escHtml(u)}</span>
+        <button class="btn-del-unit" data-i="${i}" title="Entfernen">✕</button>`;
+      list.appendChild(li);
+    });
+
+    const fVon = document.getElementById('fVon');
+    const fAn  = document.getElementById('fAn');
+    const prevVon = fVon.value, prevAn = fAn.value;
+
+    fVon.innerHTML = '<option value="">– Von –</option>';
+    fAn.innerHTML  = '<option value="">– An –</option>';
+    units.forEach(u => {
+      fVon.insertAdjacentHTML('beforeend', `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
+      fAn.insertAdjacentHTML('beforeend',  `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
+    });
+
+    if (prevVon) fVon.value = prevVon;
+    if (prevAn)  fAn.value  = prevAn;
+  }
+
+  /* ── Render log ── */
+  function badgeClass(art) {
+    const map = {
+      'Anforderung':   'badge-anforderung',
+      'Truppenmeldung':'badge-truppen',
+      'Feindmeldung':  'badge-feind',
+      'Meldung':       'badge-meldung',
+      'Sonstiges':     'badge-sonstiges',
+    };
+    return map[art] || 'badge-sonstiges';
+  }
+
+  function renderLog() {
+    const tbody = document.getElementById('logBody');
+    const count = document.getElementById('logCount');
+    count.textContent = log.length + (log.length === 1 ? ' Eintrag' : ' Einträge');
+
+    if (log.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Noch keine Einträge vorhanden.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    log.forEach((e, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-nr">${i + 1}</td>
+        <td class="td-zeit">${escHtml(e.zeit)}</td>
+        <td class="td-von">${escHtml(e.von)}</td>
+        <td class="td-an">${escHtml(e.an)}</td>
+        <td class="td-art"><span class="badge ${badgeClass(e.art)}">${escHtml(e.art)}</span></td>
+        <td class="td-inhalt">${escHtml(e.inhalt)}</td>
+        <td class="td-del"><button class="btn-del-row" data-i="${i}" title="Eintrag löschen">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    // scroll to bottom
+    const wrap = document.querySelector('.table-wrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  /* ── HTML escape ── */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── Add unit ── */
+  function addUnit() {
+    const input = document.getElementById('newUnitInput');
+    const name  = input.value.trim();
+    if (!name) return;
+    if (units.includes(name)) { input.select(); return; }
+    units.push(name);
+    input.value = '';
+    save(); renderUnits();
+  }
+
+  /* ── Add log entry ── */
+  function addEntry() {
+    const zeit   = document.getElementById('fZeit').value   || nowTime();
+    const von    = document.getElementById('fVon').value;
+    const an     = document.getElementById('fAn').value;
+    const art    = document.getElementById('fArt').value;
+    const inhalt = document.getElementById('fInhalt').value.trim();
+
+    if (!von || !inhalt) {
+      if (!von)    document.getElementById('fVon').focus();
+      else         document.getElementById('fInhalt').focus();
+      return;
+    }
+
+    log.push({ zeit, von, an, art, inhalt });
+    save(); renderLog();
+
+    // reset form
+    document.getElementById('fZeit').value   = nowTime();
+    document.getElementById('fInhalt').value = '';
+    document.getElementById('fVon').focus();
+  }
+
+  /* ── Export CSV ── */
+  function exportCSV() {
+    if (log.length === 0) return;
+    const header = 'Nr;Zeit;Von;An;Art;Inhalt\n';
+    const rows   = log.map((e, i) =>
+      [i+1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
+    ).join('\n');
+    const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const ts   = new Date().toISOString().slice(0,16).replace('T','_').replaceAll(':','');
+    a.href = url; a.download = 'TSL_' + ts + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  /* ── Event wiring ── */
+  document.getElementById('btnAddUnit').addEventListener('click', addUnit);
+  document.getElementById('newUnitInput').addEventListener('keydown', e => { if (e.key === 'Enter') addUnit(); });
+
+  document.getElementById('unitList').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-del-unit');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    units.splice(i, 1);
+    save(); renderUnits();
+  });
+
+  document.getElementById('btnLog').addEventListener('click', addEntry);
+  document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    document.getElementById('fZeit').value   = nowTime();
+    document.getElementById('fVon').value    = '';
+    document.getElementById('fAn').value     = '';
+    document.getElementById('fArt').value    = 'Anforderung';
+    document.getElementById('fInhalt').value = '';
+  });
+
+  document.getElementById('logBody').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-del-row');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    if (confirm('Eintrag #' + (i+1) + ' löschen?')) {
+      log.splice(i, 1);
+      save(); renderLog();
+    }
+  });
+
+  document.getElementById('btnClear').addEventListener('click', () => {
+    if (log.length === 0) return;
+    if (confirm('Alle ' + log.length + ' Einträge löschen?')) {
+      log = []; save(); renderLog();
+    }
+  });
+
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+
+  /* ── Init ── */
+  load();
+  renderUnits();
+  renderLog();
+  document.getElementById('fZeit').value = nowTime();
+</script>
+</body>
+</html>
