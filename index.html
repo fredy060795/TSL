@@ -603,20 +603,34 @@
   }
 
   /* ── Clock ── */
+  let fZeitManual = false;   /* true = user has overridden the time field */
+
+  function nowTime() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function resetZeitAuto() {
+    fZeitManual = false;
+    const el = document.getElementById('fZeit');
+    el.value = nowTime();
+    el.title = '';
+    el.style.borderColor = '';
+  }
+
   function tickClock() {
     const now = new Date();
     document.getElementById('clock').textContent =
       String(now.getHours()).padStart(2,'0') + ':' +
       String(now.getMinutes()).padStart(2,'0') + ':' +
       String(now.getSeconds()).padStart(2,'0');
+    /* Keep the form time field in sync unless the user has changed it manually */
+    if (!fZeitManual) {
+      document.getElementById('fZeit').value = nowTime();
+    }
   }
   setInterval(tickClock, 1000);
   tickClock();
-
-  function nowTime() {
-    const d = new Date();
-    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-  }
 
   /* ── Render units ── */
   function renderUnits() {
@@ -719,8 +733,8 @@
     log.push({ zeit, von, an, art, inhalt });
     save(); renderLog();
 
-    // reset form
-    document.getElementById('fZeit').value   = nowTime();
+    // reset form – time resumes auto-tracking
+    resetZeitAuto();
     document.getElementById('fInhalt').value = '';
     document.getElementById('fVon').focus();
   }
@@ -756,11 +770,19 @@
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
 
   document.getElementById('btnReset').addEventListener('click', () => {
-    document.getElementById('fZeit').value   = nowTime();
+    resetZeitAuto();
     document.getElementById('fVon').value    = '';
     document.getElementById('fAn').value     = '';
     document.getElementById('fArt').value    = 'Anforderung';
     document.getElementById('fInhalt').value = '';
+  });
+
+  /* Mark time as manually overridden as soon as the user edits it */
+  document.getElementById('fZeit').addEventListener('change', () => {
+    fZeitManual = true;
+    const el = document.getElementById('fZeit');
+    el.title = 'Manuelle Zeit – ↺ Reset zum Zurücksetzen';
+    el.style.borderColor = 'var(--orange)';
   });
 
   document.getElementById('logBody').addEventListener('click', e => {
@@ -786,7 +808,7 @@
   load().then(() => {
     renderUnits();
     renderLog();
-    document.getElementById('fZeit').value = nowTime();
+    /* fZeit is kept up-to-date by tickClock (already called above) */
   });
 </script>
 </body>
