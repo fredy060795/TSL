@@ -70,6 +70,28 @@
     .save-status.ok  { color: #4a9a4a; }
     .save-status.err { color: var(--red); }
 
+    /* ── Language switcher ── */
+    .lang-switch {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-left: 16px;
+    }
+    .btn-lang {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 7px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .btn-lang:hover { border-color: var(--accent); color: var(--text); }
+    .btn-lang.active { border-color: var(--accent); color: var(--accent); background: #1e2a10; }
+
     /* ── Layout ── */
     .layout {
       display: flex;
@@ -410,11 +432,16 @@
 <header>
   <div>
     <h1>TSL &mdash; Tactical Situation Log</h1>
-    <div class="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+    <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+  </div>
+  <div class="lang-switch">
+    <button class="btn-lang active" data-lang="de">DE</button>
+    <button class="btn-lang" data-lang="en">EN</button>
+    <button class="btn-lang" data-lang="cz">CZ</button>
   </div>
   <div style="text-align:right;">
     <div class="clock" id="clock">00:00:00</div>
-    <div class="save-status" id="saveStatus">Lädt…</div>
+    <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
   </div>
 </header>
 
@@ -422,20 +449,20 @@
 
   <!-- Unit Sidebar -->
   <aside class="sidebar">
-    <h2>Einheiten</h2>
+    <h2 data-i18n="sidebarUnits">Einheiten</h2>
     <ul class="unit-list" id="unitList"></ul>
     <div class="add-unit-form">
-      <input type="text" id="newUnitInput" placeholder="Einheit…" maxlength="30" />
-      <button class="btn-add-unit" id="btnAddUnit" title="Einheit hinzufügen">+</button>
+      <input type="text" id="newUnitInput" data-i18n-ph="unitPlaceholder" placeholder="Einheit…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddUnit" data-i18n-title="btnAddUnitTitle" title="Einheit hinzufügen">+</button>
     </div>
 
     <hr class="sidebar-divider" />
 
-    <h2>Ereignisarten</h2>
+    <h2 data-i18n="sidebarTypes">Ereignisarten</h2>
     <ul class="type-list" id="typeList"></ul>
     <div class="add-unit-form">
-      <input type="text" id="newTypeInput" placeholder="Neue Art…" maxlength="30" />
-      <button class="btn-add-unit" id="btnAddType" title="Ereignisart hinzufügen">+</button>
+      <input type="text" id="newTypeInput" data-i18n-ph="typePlaceholder" placeholder="Neue Art…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddType" data-i18n-title="btnAddTypeTitle" title="Ereignisart hinzufügen">+</button>
     </div>
   </aside>
 
@@ -444,51 +471,51 @@
 
     <!-- Entry Form -->
     <div class="entry-form">
-      <h2>Neuer Eintrag</h2>
+      <h2 data-i18n="formTitle">Neuer Eintrag</h2>
       <div class="form-row">
 
         <div class="form-group fg-zeit">
-          <label>Zeit</label>
+          <label data-i18n="labelZeit">Zeit</label>
           <input type="time" id="fZeit" />
         </div>
 
         <div class="form-group fg-von">
-          <label>Von</label>
+          <label data-i18n="labelVon">Von</label>
           <select id="fVon">
             <option value="">– Von –</option>
           </select>
         </div>
 
         <div class="form-group fg-an">
-          <label>An</label>
+          <label data-i18n="labelAn">An</label>
           <select id="fAn">
             <option value="">– An –</option>
           </select>
         </div>
 
         <div class="form-group fg-art">
-          <label>Art</label>
+          <label data-i18n="labelArt">Art</label>
           <select id="fArt"></select>
         </div>
 
         <div class="form-group fg-inhalt">
-          <label>Inhalt</label>
-          <input type="text" id="fInhalt" placeholder="Meldungsinhalt…" maxlength="200" />
+          <label data-i18n="labelInhalt">Inhalt</label>
+          <input type="text" id="fInhalt" data-i18n-ph="inhaltPlaceholder" placeholder="Meldungsinhalt…" maxlength="200" />
         </div>
 
-        <button class="btn-log" id="btnLog">Eintragen</button>
-        <button class="btn-reset" id="btnReset" title="Formular zurücksetzen">↺</button>
+        <button class="btn-log" id="btnLog" data-i18n="btnLog">Eintragen</button>
+        <button class="btn-reset" id="btnReset" data-i18n-title="btnResetTitle" title="Formular zurücksetzen">↺</button>
       </div>
     </div>
 
     <!-- Log Table -->
     <div class="log-section">
       <div class="log-header">
-        <h2>Lagetagebuch</h2>
+        <h2 data-i18n="logTitle">Lagetagebuch</h2>
         <div style="display:flex;align-items:center;gap:4px;">
           <span class="log-count" id="logCount">0 Einträge</span>
-          <button class="btn-export" id="btnExport" title="Als CSV exportieren">⬇ Export</button>
-          <button class="btn-clear-log" id="btnClear" title="Alle Einträge löschen">✕ Leeren</button>
+          <button class="btn-export" id="btnExport" data-i18n="btnExport" data-i18n-title="btnExportTitle" title="Als CSV exportieren">⬇ Export</button>
+          <button class="btn-clear-log" id="btnClear" data-i18n="btnClear" data-i18n-title="btnClearTitle" title="Alle Einträge löschen">✕ Leeren</button>
         </div>
       </div>
 
@@ -496,12 +523,12 @@
         <table id="logTable">
           <thead>
             <tr>
-              <th class="td-nr">Nr</th>
-              <th class="td-zeit">Zeit</th>
-              <th class="td-von">Von</th>
-              <th class="td-an">An</th>
-              <th class="td-art">Art</th>
-              <th class="td-inhalt">Inhalt</th>
+              <th class="td-nr" data-i18n="thNr">Nr</th>
+              <th class="td-zeit" data-i18n="thZeit">Zeit</th>
+              <th class="td-von" data-i18n="thVon">Von</th>
+              <th class="td-an" data-i18n="thAn">An</th>
+              <th class="td-art" data-i18n="thArt">Art</th>
+              <th class="td-inhalt" data-i18n="thInhalt">Inhalt</th>
               <th class="td-del"></th>
             </tr>
           </thead>
@@ -519,6 +546,157 @@
   /* ── State ── */
   const DEFAULT_UNITS = ['FüGr', 'Zug 1', 'Zug 2', 'Zug 3', 'San', 'Kp', 'Btl', 'Lage'];
   const DEFAULT_TYPES = ['Anforderung', 'Truppenmeldung', 'Feindmeldung', 'Meldung', 'Sonstiges'];
+
+  /* ── i18n ── */
+  const LANGS = {
+    de: {
+      subtitle:        'Lagemeldung \u2022 Funkverkehr \u2022 Echtzeit',
+      sidebarUnits:    'Einheiten',
+      unitPlaceholder: 'Einheit\u2026',
+      btnAddUnitTitle: 'Einheit hinzuf\u00fcgen',
+      sidebarTypes:    'Ereignisarten',
+      typePlaceholder: 'Neue Art\u2026',
+      btnAddTypeTitle: 'Ereignisart hinzuf\u00fcgen',
+      formTitle:       'Neuer Eintrag',
+      labelZeit:       'Zeit',       labelVon:  'Von',
+      labelAn:         'An',         labelArt:  'Art',
+      labelInhalt:     'Inhalt',
+      optVon:          '\u2013 Von \u2013',
+      optAn:           '\u2013 An \u2013',
+      inhaltPlaceholder: 'Meldungsinhalt\u2026',
+      btnLog:          'Eintragen',
+      btnResetTitle:   'Formular zur\u00fccksetzen',
+      logTitle:        'Lagetagebuch',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Als CSV exportieren',
+      btnClear:        '\u2715 Leeren',
+      btnClearTitle:   'Alle Eintr\u00e4ge l\u00f6schen',
+      thNr: 'Nr', thZeit: 'Zeit', thVon: 'Von', thAn: 'An', thArt: 'Art', thInhalt: 'Inhalt',
+      emptyState:      'Noch keine Eintr\u00e4ge vorhanden.',
+      saveLoading:     'L\u00e4dt\u2026',
+      saveOk:          '\u2714 Gespeichert ',
+      saveErr:         '\u26a0 Speichern fehlgeschlagen \u2013 Fallback aktiv',
+      entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
+      remove:          'Entfernen',  typeDefault: 'Standard',
+      delRow:          'Eintrag l\u00f6schen',
+      zeitManual:      'Manuelle Zeit \u2013 \u21ba Reset zum Zur\u00fccksetzen',
+      confirmDel:      'Eintrag #{n} l\u00f6schen?',
+      confirmClear:    'Alle {n} Eintr\u00e4ge l\u00f6schen?',
+      csvHeader:       'Nr;Zeit;Von;An;Art;Inhalt',
+      typeNames: { 'Anforderung':'Anforderung','Truppenmeldung':'Truppenmeldung',
+                   'Feindmeldung':'Feindmeldung','Meldung':'Meldung','Sonstiges':'Sonstiges' },
+    },
+    en: {
+      subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
+      sidebarUnits:    'Units',
+      unitPlaceholder: 'Unit\u2026',
+      btnAddUnitTitle: 'Add unit',
+      sidebarTypes:    'Event types',
+      typePlaceholder: 'New type\u2026',
+      btnAddTypeTitle: 'Add event type',
+      formTitle:       'New entry',
+      labelZeit:       'Time',       labelVon:  'From',
+      labelAn:         'To',         labelArt:  'Type',
+      labelInhalt:     'Content',
+      optVon:          '\u2013 From \u2013',
+      optAn:           '\u2013 To \u2013',
+      inhaltPlaceholder: 'Message content\u2026',
+      btnLog:          'Submit',
+      btnResetTitle:   'Reset form',
+      logTitle:        'Situation Log',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Export as CSV',
+      btnClear:        '\u2715 Clear',
+      btnClearTitle:   'Delete all entries',
+      thNr: 'No', thZeit: 'Time', thVon: 'From', thAn: 'To', thArt: 'Type', thInhalt: 'Content',
+      emptyState:      'No entries yet.',
+      saveLoading:     'Loading\u2026',
+      saveOk:          '\u2714 Saved ',
+      saveErr:         '\u26a0 Save failed \u2013 fallback active',
+      entry1:          ' entry',     entryN: ' entries',
+      remove:          'Remove',     typeDefault: 'Default',
+      delRow:          'Delete entry',
+      zeitManual:      'Manual time \u2013 \u21ba Reset to restore',
+      confirmDel:      'Delete entry #{n}?',
+      confirmClear:    'Delete all {n} entries?',
+      csvHeader:       'No;Time;From;To;Type;Content',
+      typeNames: { 'Anforderung':'Request','Truppenmeldung':'Troops report',
+                   'Feindmeldung':'Enemy report','Meldung':'Report','Sonstiges':'Other' },
+    },
+    cz: {
+      subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
+      sidebarUnits:    'Jednotky',
+      unitPlaceholder: 'Jednotka\u2026',
+      btnAddUnitTitle: 'P\u0159idat jednotku',
+      sidebarTypes:    'Typy ud\u00e1lost\u00ed',
+      typePlaceholder: 'Nov\u00fd typ\u2026',
+      btnAddTypeTitle: 'P\u0159idat typ ud\u00e1losti',
+      formTitle:       'Nov\u00fd z\u00e1znam',
+      labelZeit:       '\u010cas',    labelVon:  'Od',
+      labelAn:         'Pro',         labelArt:  'Typ',
+      labelInhalt:     'Obsah',
+      optVon:          '\u2013 Od \u2013',
+      optAn:           '\u2013 Pro \u2013',
+      inhaltPlaceholder: 'Obsah hl\u00e1šen\u00ed\u2026',
+      btnLog:          'Zapsat',
+      btnResetTitle:   'Resetovat formul\u00e1\u0159',
+      logTitle:        'Den\u00edk situace',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Exportovat jako CSV',
+      btnClear:        '\u2715 Vymazat',
+      btnClearTitle:   'Smazat v\u0161echny z\u00e1znamy',
+      thNr: 'Nr', thZeit: '\u010cas', thVon: 'Od', thAn: 'Pro', thArt: 'Typ', thInhalt: 'Obsah',
+      emptyState:      '\u017d\u00e1dn\u00e9 z\u00e1znamy.',
+      saveLoading:     'Na\u010d\u00edt\u00e1m\u2026',
+      saveOk:          '\u2714 Ulo\u017eeno ',
+      saveErr:         '\u26a0 Ulo\u017een\u00ed selhalo \u2013 z\u00e1loha aktivn\u00ed',
+      entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
+      remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
+      delRow:          'Smazat z\u00e1znam',
+      zeitManual:      'Ru\u010dn\u00ed \u010das \u2013 \u21ba Reset pro obnoven\u00ed',
+      confirmDel:      'Smazat z\u00e1znam #{n}?',
+      confirmClear:    'Smazat v\u0161echny {n} z\u00e1znamy?',
+      csvHeader:       'Nr;\u010cas;Od;Pro;Typ;Obsah',
+      typeNames: { 'Anforderung':'Po\u017eadavek','Truppenmeldung':'Hl\u00e1šen\u00ed vojsk',
+                   'Feindmeldung':'Hl\u00e1šen\u00ed nep\u0159\u00edtele','Meldung':'Hl\u00e1šen\u00ed','Sonstiges':'Ostatn\u00ed' },
+    },
+  };
+
+  let lang = localStorage.getItem('tsl_lang') || 'de';
+
+  function t(key) {
+    return (LANGS[lang] && LANGS[lang][key] !== undefined ? LANGS[lang][key] : null) ||
+           (LANGS.de[key] !== undefined ? LANGS.de[key] : key);
+  }
+
+  /* Translate a type name for display (only for built-in default types) */
+  function tType(name) {
+    return (LANGS[lang].typeNames && LANGS[lang].typeNames[name]) || name;
+  }
+
+  /* Apply current language to all static data-i18n elements */
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      /* Skip live-updated elements (saveStatus is managed by setSaveStatus) */
+      if (el.id === 'saveStatus') return;
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.placeholder = t(el.dataset.i18nPh);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = t(el.dataset.i18nTitle);
+    });
+    /* Active lang button highlight */
+    document.querySelectorAll('.btn-lang').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    /* Re-render dynamic parts that contain translated strings */
+    renderUnits();
+    renderTypes();
+    renderLog();
+  }
   let units = [];
   let types = [];
   let log   = [];
@@ -596,18 +774,24 @@
   }
 
   /* ── Save-status indicator ── */
+  let lastSaveOk = null;   /* null=loading, true=ok, false=err */
+
   function setSaveStatus(ok) {
+    lastSaveOk = ok;
     const el = document.getElementById('saveStatus');
-    if (ok) {
+    if (ok === true) {
       const now = new Date();
-      const hhmm = String(now.getHours()).padStart(2,'0') + ':' +
-                   String(now.getMinutes()).padStart(2,'0') + ':' +
-                   String(now.getSeconds()).padStart(2,'0');
-      el.textContent = '✔ Gespeichert ' + hhmm;
+      const ts  = String(now.getHours()).padStart(2,'0') + ':' +
+                  String(now.getMinutes()).padStart(2,'0') + ':' +
+                  String(now.getSeconds()).padStart(2,'0');
+      el.textContent = t('saveOk') + ts;
       el.className   = 'save-status ok';
-    } else {
-      el.textContent = '⚠ Speichern fehlgeschlagen – Fallback aktiv';
+    } else if (ok === false) {
+      el.textContent = t('saveErr');
       el.className   = 'save-status err';
+    } else {
+      el.textContent = t('saveLoading');
+      el.className   = 'save-status';
     }
   }
 
@@ -618,6 +802,7 @@
       localStorage.setItem('tsl_units', JSON.stringify(units));
       localStorage.setItem('tsl_types', JSON.stringify(types));
       localStorage.setItem('tsl_log',   JSON.stringify(log));
+      localStorage.setItem('tsl_lang',  lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
     saveToIDB();
