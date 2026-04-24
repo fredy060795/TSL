@@ -60,6 +60,15 @@
       letter-spacing: 2px;
       font-weight: bold;
     }
+    .save-status {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-align: right;
+      margin-top: 2px;
+    }
+    .save-status.ok  { color: #4a9a4a; }
+    .save-status.err { color: var(--red); }
 
     /* ── Layout ── */
     .layout {
@@ -368,7 +377,10 @@
     <h1>TSL &mdash; Tactical Situation Log</h1>
     <div class="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
   </div>
-  <div class="clock" id="clock">00:00:00</div>
+  <div style="text-align:right;">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="save-status" id="saveStatus">Lädt…</div>
+  </div>
 </header>
 
 <div class="layout">
@@ -471,22 +483,123 @@
   let units = [];
   let log   = [];
 
-  /* ── Persist ── */
-  function save() {
-    localStorage.setItem('tsl_units', JSON.stringify(units));
-    localStorage.setItem('tsl_log',   JSON.stringify(log));
+  /* ── IndexedDB (primary persistent storage) ── */
+  const IDB_NAME    = 'tsl_db';
+  const IDB_VERSION = 1;
+  const IDB_STORE   = 'data';
+
+  let idbAvailable = true;   /* tracks whether IDB works at runtime */
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE);
+        }
+      };
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror   = e => reject(e.target.error);
+    });
   }
-  function load() {
+
+  function idbGet(store, key) {
+    return new Promise((resolve, reject) => {
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = () => {
+        console.error('IDB get failed for key "' + key + '":', req.error);
+        reject(req.error);
+      };
+    });
+  }
+
+  async function saveToIDB() {
+    try {
+      const db  = await openDB();
+      const tx  = db.transaction(IDB_STORE, 'readwrite');
+      const st  = tx.objectStore(IDB_STORE);
+      st.put(units,       'units');
+      st.put(log,         'log');
+      st.put(Date.now(),  'lastSaved');
+      await new Promise((res, rej) => {
+        tx.oncomplete = res;
+        tx.onerror    = () => rej(tx.error);
+      });
+      idbAvailable = true;
+      setSaveStatus(true);
+    } catch(e) {
+      idbAvailable = false;
+      console.error('IDB save failed:', e);
+      setSaveStatus(false);
+    }
+  }
+
+  async function loadFromIDB() {
+    try {
+      const db   = await openDB();
+      const tx   = db.transaction(IDB_STORE, 'readonly');
+      const st   = tx.objectStore(IDB_STORE);
+      const [u, l, ts] = await Promise.all([
+        idbGet(st, 'units'),
+        idbGet(st, 'log'),
+        idbGet(st, 'lastSaved'),
+      ]);
+      return { units: u, log: l, lastSaved: ts };
+    } catch(e) {
+      console.error('IDB load failed:', e);
+      return null;
+    }
+  }
+
+  /* ── Save-status indicator ── */
+  function setSaveStatus(ok) {
+    const el = document.getElementById('saveStatus');
+    if (ok) {
+      const now = new Date();
+      const hhmm = String(now.getHours()).padStart(2,'0') + ':' +
+                   String(now.getMinutes()).padStart(2,'0') + ':' +
+                   String(now.getSeconds()).padStart(2,'0');
+      el.textContent = '✔ Gespeichert ' + hhmm;
+      el.className   = 'save-status ok';
+    } else {
+      el.textContent = '⚠ Speichern fehlgeschlagen – Fallback aktiv';
+      el.className   = 'save-status err';
+    }
+  }
+
+  /* ── Persist (writes to both IDB and localStorage) ── */
+  function save() {
+    /* Synchronous localStorage fallback – always written first */
+    try {
+      localStorage.setItem('tsl_units', JSON.stringify(units));
+      localStorage.setItem('tsl_log',   JSON.stringify(log));
+    } catch(e) { console.warn('localStorage write failed:', e); }
+    /* Async IndexedDB primary storage */
+    saveToIDB();
+  }
+
+  async function load() {
+    /* 1. Try IndexedDB (primary) */
+    const idb = await loadFromIDB();
+    if (idb && idb.units !== undefined && idb.log !== undefined) {
+      units = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      log   = Array.isArray(idb.log)   ? idb.log   : [];
+      if (idb.lastSaved) setSaveStatus(true);
+      return;
+    }
+    /* 2. Fallback: localStorage */
     try {
       const parsedUnits = JSON.parse(localStorage.getItem('tsl_units'));
       units = parsedUnits !== null ? parsedUnits : DEFAULT_UNITS.slice();
-    }
-    catch(e) { units = DEFAULT_UNITS.slice(); }
+    } catch(e) { units = DEFAULT_UNITS.slice(); }
     try {
       const parsedLog = JSON.parse(localStorage.getItem('tsl_log'));
       log = parsedLog !== null ? parsedLog : [];
-    }
-    catch(e) { log = []; }
+    } catch(e) { log = []; }
+    /* Migrate localStorage data into IDB once if IDB appears functional */
+    if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
   }
 
   /* ── Clock ── */
@@ -670,10 +783,11 @@
   document.getElementById('btnExport').addEventListener('click', exportCSV);
 
   /* ── Init ── */
-  load();
-  renderUnits();
-  renderLog();
-  document.getElementById('fZeit').value = nowTime();
+  load().then(() => {
+    renderUnits();
+    renderLog();
+    document.getElementById('fZeit').value = nowTime();
+  });
 </script>
 </body>
 </html>
