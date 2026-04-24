@@ -209,6 +209,72 @@
     }
     .type-list li .btn-del-type:hover { color: var(--red); }
 
+    /* ── Unit status badges ── */
+    .unit-status {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: bold;
+      padding: 1px 5px;
+      border-radius: 2px;
+      cursor: pointer;
+      user-select: none;
+      margin-right: 4px;
+      border: 1px solid transparent;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .unit-status:hover { opacity: 0.75; }
+    .status-active  { background: #1a3a1a; color: #7ad07a; border-color: #3a6a3a; }
+    .status-base    { background: #1a2a4a; color: #7ab4e8; border-color: #2a4a7a; }
+    .status-kia     { background: #4a1a1a; color: #e87a7a; border-color: #7a2a2a; }
+    .status-unknown { background: #2a2a2a; color: #909090; border-color: #444444; }
+    .unit-list li.kia-unit .unit-name { opacity: 0.4; text-decoration: line-through; }
+
+    /* ── Lagebild (status overview panel) ── */
+    .lagebild {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .lagebild-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+    .lagebild-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 3px;
+      font-size: 11px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.15s;
+    }
+    .lagebild-chip:hover { opacity: 0.8; }
+    .lagebild-chip .chip-name   { font-weight: bold; }
+    .lagebild-chip .chip-status { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
+    .chip-active  { background: #1a3a1a; border-color: #3a6a3a; color: #7ad07a; }
+    .chip-base    { background: #1a2a4a; border-color: #2a4a7a; color: #7ab4e8; }
+    .chip-kia     { background: #4a1a1a; border-color: #7a2a2a; color: #e87a7a; }
+    .chip-kia .chip-name { text-decoration: line-through; opacity: 0.6; }
+    .chip-unknown { background: #2a2a2a; border-color: #444444; color: #909090; }
+    .lagebild-empty { color: var(--text-dim); font-size: 11px; font-style: italic; }
+
+    /* badge for auto-logged status events */
+    .badge-statusmeldung { background: #2a1040; color: #c07ae8; }
+
     /* ── Main Content ── */
     .main {
       flex: 1;
@@ -508,6 +574,11 @@
       </div>
     </div>
 
+    <!-- Lagebild (unit status overview) -->
+    <div class="lagebild" id="lagebild">
+      <span class="lagebild-title" data-i18n="lagebild">Lagebild</span>
+    </div>
+
     <!-- Log Table -->
     <div class="log-section">
       <div class="log-header">
@@ -585,6 +656,13 @@
       csvHeader:       'Nr;Zeit;Von;An;Art;Inhalt',
       typeNames: { 'Anforderung':'Anforderung','Truppenmeldung':'Truppenmeldung',
                    'Feindmeldung':'Feindmeldung','Meldung':'Meldung','Sonstiges':'Sonstiges' },
+      lagebild:        'Lagebild',
+      status_active:   'Aktiv',
+      status_base:     'Basis',
+      status_kia:      'KIA',
+      status_unknown:  'Unbek.',
+      statusAutoLog:   'Status: {old} \u2192 {new}',
+      lagebild_empty:  'Keine Einheiten.',
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
@@ -622,6 +700,13 @@
       csvHeader:       'No;Time;From;To;Type;Content',
       typeNames: { 'Anforderung':'Request','Truppenmeldung':'Troops report',
                    'Feindmeldung':'Enemy report','Meldung':'Report','Sonstiges':'Other' },
+      lagebild:        'Status Board',
+      status_active:   'Active',
+      status_base:     'Base',
+      status_kia:      'KIA',
+      status_unknown:  'Unkn.',
+      statusAutoLog:   'Status: {old} \u2192 {new}',
+      lagebild_empty:  'No units.',
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
@@ -659,6 +744,13 @@
       csvHeader:       'Nr;\u010cas;Od;Pro;Typ;Obsah',
       typeNames: { 'Anforderung':'Po\u017eadavek','Truppenmeldung':'Hl\u00e1šen\u00ed vojsk',
                    'Feindmeldung':'Hl\u00e1šen\u00ed nep\u0159\u00edtele','Meldung':'Hl\u00e1šen\u00ed','Sonstiges':'Ostatn\u00ed' },
+      lagebild:        'P\u0159ehled stavu',
+      status_active:   'Aktivn\u00ed',
+      status_base:     'Z\u00e1kladna',
+      status_kia:      'KIA',
+      status_unknown:  'Nezn.',
+      statusAutoLog:   'Stav: {old} \u2192 {new}',
+      lagebild_empty:  '\u017d\u00e1dn\u00e9 jednotky.',
     },
   };
 
@@ -695,11 +787,16 @@
     /* Re-render dynamic parts that contain translated strings */
     renderUnits();
     renderTypes();
+    renderLagebild();
     renderLog();
+    /* Re-apply save status in new language */
+    setSaveStatus(lastSaveOk);
   }
   let units = [];
   let types = [];
   let log   = [];
+  let unitStatuses = {};   /* { unitName: 'active'|'base'|'kia'|'unknown' } */
+  const STATUSES = ['active', 'base', 'kia', 'unknown'];
 
   /* ── IndexedDB (primary persistent storage) ── */
   const IDB_NAME    = 'tsl_db';
@@ -738,10 +835,11 @@
       const db  = await openDB();
       const tx  = db.transaction(IDB_STORE, 'readwrite');
       const st  = tx.objectStore(IDB_STORE);
-      st.put(units,       'units');
-      st.put(types,       'types');
-      st.put(log,         'log');
-      st.put(Date.now(),  'lastSaved');
+      st.put(units,         'units');
+      st.put(types,         'types');
+      st.put(log,           'log');
+      st.put(unitStatuses,  'unitStatuses');
+      st.put(Date.now(),    'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
         tx.onerror    = () => rej(tx.error);
@@ -760,13 +858,14 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, ts] = await Promise.all([
+      const [u, t, l, us, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
+        idbGet(st, 'unitStatuses'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -799,39 +898,51 @@
   function save() {
     /* Synchronous localStorage fallback – always written first */
     try {
-      localStorage.setItem('tsl_units', JSON.stringify(units));
-      localStorage.setItem('tsl_types', JSON.stringify(types));
-      localStorage.setItem('tsl_log',   JSON.stringify(log));
-      localStorage.setItem('tsl_lang',  lang);
+      localStorage.setItem('tsl_units',        JSON.stringify(units));
+      localStorage.setItem('tsl_types',        JSON.stringify(types));
+      localStorage.setItem('tsl_log',          JSON.stringify(log));
+      localStorage.setItem('tsl_unitStatuses', JSON.stringify(unitStatuses));
+      localStorage.setItem('tsl_lang',         lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
     saveToIDB();
+  }
+
+  function ensureUnitStatuses() {
+    units.forEach(u => { if (!unitStatuses[u]) unitStatuses[u] = 'active'; });
   }
 
   async function load() {
     /* 1. Try IndexedDB (primary) */
     const idb = await loadFromIDB();
     if (idb && idb.units !== undefined && idb.log !== undefined) {
-      units = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
-      types = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
-      log   = Array.isArray(idb.log)   ? idb.log   : [];
+      units        = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      types        = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
+      log          = Array.isArray(idb.log)   ? idb.log   : [];
+      unitStatuses = (idb.unitStatuses && typeof idb.unitStatuses === 'object') ? idb.unitStatuses : {};
+      ensureUnitStatuses();
       if (idb.lastSaved) setSaveStatus(true);
       return;
     }
     /* 2. Fallback: localStorage */
     try {
-      const parsedUnits = JSON.parse(localStorage.getItem('tsl_units'));
-      units = parsedUnits !== null ? parsedUnits : DEFAULT_UNITS.slice();
+      const p = JSON.parse(localStorage.getItem('tsl_units'));
+      units = p !== null ? p : DEFAULT_UNITS.slice();
     } catch(e) { units = DEFAULT_UNITS.slice(); }
     try {
-      const parsedTypes = JSON.parse(localStorage.getItem('tsl_types'));
-      types = parsedTypes !== null ? parsedTypes : DEFAULT_TYPES.slice();
+      const p = JSON.parse(localStorage.getItem('tsl_types'));
+      types = p !== null ? p : DEFAULT_TYPES.slice();
     } catch(e) { types = DEFAULT_TYPES.slice(); }
     try {
-      const parsedLog = JSON.parse(localStorage.getItem('tsl_log'));
-      log = parsedLog !== null ? parsedLog : [];
+      const p = JSON.parse(localStorage.getItem('tsl_log'));
+      log = p !== null ? p : [];
     } catch(e) { log = []; }
-    /* Migrate localStorage data into IDB once if IDB appears functional */
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_unitStatuses'));
+      unitStatuses = (p && typeof p === 'object') ? p : {};
+    } catch(e) { unitStatuses = {}; }
+    ensureUnitStatuses();
+    /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
   }
 
@@ -870,9 +981,15 @@
     const list = document.getElementById('unitList');
     list.innerHTML = '';
     units.forEach((u, i) => {
+      const status = unitStatuses[u] || 'active';
       const li = document.createElement('li');
-      li.innerHTML = `<span class="unit-name">${escHtml(u)}</span>
-        <button class="btn-del-unit" data-i="${i}" title="Entfernen">✕</button>`;
+      if (status === 'kia') li.classList.add('kia-unit');
+      li.innerHTML =
+        `<button class="unit-status status-${status}" data-unit="${escHtml(u)}" title="${escHtml(t('statusAutoLog').replace('{old}','').replace('{new}','…'))}">` +
+          `${escHtml(t('status_' + status))}` +
+        `</button>` +
+        `<span class="unit-name">${escHtml(u)}</span>` +
+        `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
     });
 
@@ -880,8 +997,8 @@
     const fAn  = document.getElementById('fAn');
     const prevVon = fVon.value, prevAn = fAn.value;
 
-    fVon.innerHTML = '<option value="">– Von –</option>';
-    fAn.innerHTML  = '<option value="">– An –</option>';
+    fVon.innerHTML = `<option value="">${escHtml(t('optVon'))}</option>`;
+    fAn.innerHTML  = `<option value="">${escHtml(t('optAn'))}</option>`;
     units.forEach(u => {
       fVon.insertAdjacentHTML('beforeend', `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
       fAn.insertAdjacentHTML('beforeend',  `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
@@ -898,33 +1015,79 @@
     const prev  = fArt.value;
 
     list.innerHTML = '';
-    types.forEach((t, i) => {
-      const isDefault = DEFAULT_TYPES.includes(t);
+    types.forEach((ty, i) => {
+      const isDefault = DEFAULT_TYPES.includes(ty);
       const li = document.createElement('li');
       if (isDefault) li.classList.add('type-default');
-      li.innerHTML = `<span class="type-name">${escHtml(t)}</span>` +
+      li.innerHTML = `<span class="type-name">${escHtml(tType(ty))}</span>` +
         (isDefault
-          ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="Standard">○</span>`
-          : `<button class="btn-del-type" data-i="${i}" title="Entfernen">✕</button>`);
+          ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`
+          : `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`);
       list.appendChild(li);
     });
 
     fArt.innerHTML = '';
-    types.forEach(t => {
-      fArt.insertAdjacentHTML('beforeend', `<option value="${escHtml(t)}">${escHtml(t)}</option>`);
+    types.forEach(ty => {
+      fArt.insertAdjacentHTML('beforeend', `<option value="${escHtml(ty)}">${escHtml(tType(ty))}</option>`);
     });
 
     if (prev && types.includes(prev)) fArt.value = prev;
   }
 
+  /* ── Render Lagebild (status overview) ── */
+  function renderLagebild() {
+    const panel = document.getElementById('lagebild');
+    /* Remove old chips, keep the title span */
+    panel.querySelectorAll('.lagebild-chip, .lagebild-empty').forEach(el => el.remove());
+
+    if (units.length === 0) {
+      panel.insertAdjacentHTML('beforeend',
+        `<span class="lagebild-empty">${escHtml(t('lagebild_empty'))}</span>`);
+      return;
+    }
+    units.forEach(u => {
+      const status = unitStatuses[u] || 'active';
+      const chip = document.createElement('div');
+      chip.className = `lagebild-chip chip-${status}`;
+      chip.dataset.unit = u;
+      chip.title = u + ': ' + t('status_' + status);
+      chip.innerHTML =
+        `<span class="chip-name">${escHtml(u)}</span>` +
+        `<span class="chip-status">${escHtml(t('status_' + status))}</span>`;
+      panel.appendChild(chip);
+    });
+  }
+
+  /* ── Set unit status (cycles on click, auto-logs change) ── */
+  function setUnitStatus(unitName) {
+    const current = unitStatuses[unitName] || 'active';
+    const next    = STATUSES[(STATUSES.indexOf(current) + 1) % STATUSES.length];
+    const oldLabel = t('status_' + current);
+    const newLabel = t('status_' + next);
+    unitStatuses[unitName] = next;
+    /* Auto-log the status change */
+    log.push({
+      zeit:   nowTime(),
+      von:    unitName,
+      an:     '',
+      art:    'Statusmeldung',
+      inhalt: t('statusAutoLog').replace('{old}', oldLabel).replace('{new}', newLabel),
+    });
+    save();
+    renderUnits();
+    renderLagebild();
+    renderLog();
+  }
+
   /* ── Render log ── */
   function badgeClass(art) {
     const map = {
-      'Anforderung':   'badge-anforderung',
-      'Truppenmeldung':'badge-truppen',
-      'Feindmeldung':  'badge-feind',
-      'Meldung':       'badge-meldung',
-      'Sonstiges':     'badge-sonstiges',
+      'Anforderung':    'badge-anforderung',
+      'Truppenmeldung': 'badge-truppen',
+      'Feindmeldung':   'badge-feind',
+      'Meldung':        'badge-meldung',
+      'Sonstiges':      'badge-sonstiges',
+      'Statusmeldung':  'badge-statusmeldung',
     };
     return map[art] || 'badge-sonstiges';
   }
@@ -932,10 +1095,10 @@
   function renderLog() {
     const tbody = document.getElementById('logBody');
     const count = document.getElementById('logCount');
-    count.textContent = log.length + (log.length === 1 ? ' Eintrag' : ' Einträge');
+    count.textContent = log.length + (log.length === 1 ? t('entry1') : t('entryN'));
 
     if (log.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Noch keine Einträge vorhanden.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${escHtml(t('emptyState'))}</td></tr>`;
       return;
     }
     tbody.innerHTML = '';
@@ -948,11 +1111,10 @@
         <td class="td-an">${escHtml(e.an)}</td>
         <td class="td-art"><span class="badge ${badgeClass(e.art)}">${escHtml(e.art)}</span></td>
         <td class="td-inhalt">${escHtml(e.inhalt)}</td>
-        <td class="td-del"><button class="btn-del-row" data-i="${i}" title="Eintrag löschen">✕</button></td>
+        <td class="td-del"><button class="btn-del-row" data-i="${i}" title="${escHtml(t('delRow'))}">✕</button></td>
       `;
       tbody.appendChild(tr);
     });
-    // scroll to bottom
     const wrap = document.querySelector('.table-wrap');
     wrap.scrollTop = wrap.scrollHeight;
   }
@@ -971,8 +1133,9 @@
     if (!name) return;
     if (units.includes(name)) { input.select(); return; }
     units.push(name);
+    unitStatuses[name] = 'active';
     input.value = '';
-    save(); renderUnits();
+    save(); renderUnits(); renderLagebild();
   }
 
   /* ── Add type ── */
@@ -1010,7 +1173,7 @@
   /* ── Export CSV ── */
   function exportCSV() {
     if (log.length === 0) return;
-    const header = 'Nr;Zeit;Von;An;Art;Inhalt\n';
+    const header = t('csvHeader') + '\n';
     const rows   = log.map((e, i) =>
       [i+1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
     ).join('\n');
@@ -1023,15 +1186,30 @@
   }
 
   /* ── Event wiring ── */
+  /* Language switcher */
+  document.querySelectorAll('.btn-lang').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem('tsl_lang', lang);
+      applyLang();
+    });
+  });
+
   document.getElementById('btnAddUnit').addEventListener('click', addUnit);
   document.getElementById('newUnitInput').addEventListener('keydown', e => { if (e.key === 'Enter') addUnit(); });
 
   document.getElementById('unitList').addEventListener('click', e => {
-    const btn = e.target.closest('.btn-del-unit');
-    if (!btn) return;
-    const i = parseInt(btn.dataset.i, 10);
+    /* Status badge click – cycle status */
+    const statusBtn = e.target.closest('.unit-status');
+    if (statusBtn) { setUnitStatus(statusBtn.dataset.unit); return; }
+    /* Delete button */
+    const delBtn = e.target.closest('.btn-del-unit');
+    if (!delBtn) return;
+    const i = parseInt(delBtn.dataset.i, 10);
+    const name = units[i];
     units.splice(i, 1);
-    save(); renderUnits();
+    delete unitStatuses[name];
+    save(); renderUnits(); renderLagebild();
   });
 
   document.getElementById('btnAddType').addEventListener('click', addType);
@@ -1043,6 +1221,13 @@
     const i = parseInt(btn.dataset.i, 10);
     types.splice(i, 1);
     save(); renderTypes();
+  });
+
+  /* Status click on Lagebild chips */
+  document.getElementById('lagebild').addEventListener('click', e => {
+    const chip = e.target.closest('.lagebild-chip');
+    if (!chip) return;
+    setUnitStatus(chip.dataset.unit);
   });
 
   document.getElementById('btnLog').addEventListener('click', addEntry);
@@ -1060,7 +1245,7 @@
   document.getElementById('fZeit').addEventListener('change', () => {
     fZeitManual = true;
     const el = document.getElementById('fZeit');
-    el.title = 'Manuelle Zeit – ↺ Reset zum Zurücksetzen';
+    el.title = t('zeitManual');
     el.style.borderColor = 'var(--orange)';
   });
 
@@ -1068,7 +1253,7 @@
     const btn = e.target.closest('.btn-del-row');
     if (!btn) return;
     const i = parseInt(btn.dataset.i, 10);
-    if (confirm('Eintrag #' + (i+1) + ' löschen?')) {
+    if (confirm(t('confirmDel').replace('{n}', i + 1))) {
       log.splice(i, 1);
       save(); renderLog();
     }
@@ -1076,7 +1261,7 @@
 
   document.getElementById('btnClear').addEventListener('click', () => {
     if (log.length === 0) return;
-    if (confirm('Alle ' + log.length + ' Einträge löschen?')) {
+    if (confirm(t('confirmClear').replace('{n}', log.length))) {
       log = []; save(); renderLog();
     }
   });
@@ -1085,10 +1270,7 @@
 
   /* ── Init ── */
   load().then(() => {
-    renderUnits();
-    renderTypes();
-    renderLog();
-    /* fZeit is kept up-to-date by tickClock (already called above) */
+    applyLang();  /* sets lang, renders all panels, applies translations */
   });
 </script>
 </body>
