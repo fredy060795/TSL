@@ -152,6 +152,41 @@
     }
     .btn-add-unit:hover { background: var(--accent); }
 
+    /* ── Types section in sidebar ── */
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 0;
+    }
+    .type-list {
+      list-style: none;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .type-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px;
+      border-radius: 3px;
+      cursor: default;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .type-list li:hover { background: #2d3228; }
+    .type-list li .type-name { flex: 1; font-size: 12px; }
+    .type-list li.type-default .type-name { color: var(--text-dim); font-style: italic; }
+    .type-list li .btn-del-type {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .type-list li .btn-del-type:hover { color: var(--red); }
+
     /* ── Main Content ── */
     .main {
       flex: 1;
@@ -393,6 +428,15 @@
       <input type="text" id="newUnitInput" placeholder="Einheit…" maxlength="30" />
       <button class="btn-add-unit" id="btnAddUnit" title="Einheit hinzufügen">+</button>
     </div>
+
+    <hr class="sidebar-divider" />
+
+    <h2>Ereignisarten</h2>
+    <ul class="type-list" id="typeList"></ul>
+    <div class="add-unit-form">
+      <input type="text" id="newTypeInput" placeholder="Neue Art…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddType" title="Ereignisart hinzufügen">+</button>
+    </div>
   </aside>
 
   <!-- Main -->
@@ -424,13 +468,7 @@
 
         <div class="form-group fg-art">
           <label>Art</label>
-          <select id="fArt">
-            <option value="Anforderung">Anforderung</option>
-            <option value="Truppenmeldung">Truppenmeldung</option>
-            <option value="Feindmeldung">Feindmeldung</option>
-            <option value="Meldung">Meldung</option>
-            <option value="Sonstiges">Sonstiges</option>
-          </select>
+          <select id="fArt"></select>
         </div>
 
         <div class="form-group fg-inhalt">
@@ -480,7 +518,9 @@
 <script>
   /* ── State ── */
   const DEFAULT_UNITS = ['FüGr', 'Zug 1', 'Zug 2', 'Zug 3', 'San', 'Kp', 'Btl', 'Lage'];
+  const DEFAULT_TYPES = ['Anforderung', 'Truppenmeldung', 'Feindmeldung', 'Meldung', 'Sonstiges'];
   let units = [];
+  let types = [];
   let log   = [];
 
   /* ── IndexedDB (primary persistent storage) ── */
@@ -521,6 +561,7 @@
       const tx  = db.transaction(IDB_STORE, 'readwrite');
       const st  = tx.objectStore(IDB_STORE);
       st.put(units,       'units');
+      st.put(types,       'types');
       st.put(log,         'log');
       st.put(Date.now(),  'lastSaved');
       await new Promise((res, rej) => {
@@ -541,12 +582,13 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, l, ts] = await Promise.all([
+      const [u, t, l, ts] = await Promise.all([
         idbGet(st, 'units'),
+        idbGet(st, 'types'),
         idbGet(st, 'log'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, log: l, lastSaved: ts };
+      return { units: u, types: t, log: l, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -574,6 +616,7 @@
     /* Synchronous localStorage fallback – always written first */
     try {
       localStorage.setItem('tsl_units', JSON.stringify(units));
+      localStorage.setItem('tsl_types', JSON.stringify(types));
       localStorage.setItem('tsl_log',   JSON.stringify(log));
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
@@ -585,6 +628,7 @@
     const idb = await loadFromIDB();
     if (idb && idb.units !== undefined && idb.log !== undefined) {
       units = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      types = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
       log   = Array.isArray(idb.log)   ? idb.log   : [];
       if (idb.lastSaved) setSaveStatus(true);
       return;
@@ -594,6 +638,10 @@
       const parsedUnits = JSON.parse(localStorage.getItem('tsl_units'));
       units = parsedUnits !== null ? parsedUnits : DEFAULT_UNITS.slice();
     } catch(e) { units = DEFAULT_UNITS.slice(); }
+    try {
+      const parsedTypes = JSON.parse(localStorage.getItem('tsl_types'));
+      types = parsedTypes !== null ? parsedTypes : DEFAULT_TYPES.slice();
+    } catch(e) { types = DEFAULT_TYPES.slice(); }
     try {
       const parsedLog = JSON.parse(localStorage.getItem('tsl_log'));
       log = parsedLog !== null ? parsedLog : [];
@@ -658,6 +706,32 @@
     if (prevAn)  fAn.value  = prevAn;
   }
 
+  /* ── Render types ── */
+  function renderTypes() {
+    const list  = document.getElementById('typeList');
+    const fArt  = document.getElementById('fArt');
+    const prev  = fArt.value;
+
+    list.innerHTML = '';
+    types.forEach((t, i) => {
+      const isDefault = DEFAULT_TYPES.includes(t);
+      const li = document.createElement('li');
+      if (isDefault) li.classList.add('type-default');
+      li.innerHTML = `<span class="type-name">${escHtml(t)}</span>` +
+        (isDefault
+          ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="Standard">○</span>`
+          : `<button class="btn-del-type" data-i="${i}" title="Entfernen">✕</button>`);
+      list.appendChild(li);
+    });
+
+    fArt.innerHTML = '';
+    types.forEach(t => {
+      fArt.insertAdjacentHTML('beforeend', `<option value="${escHtml(t)}">${escHtml(t)}</option>`);
+    });
+
+    if (prev && types.includes(prev)) fArt.value = prev;
+  }
+
   /* ── Render log ── */
   function badgeClass(art) {
     const map = {
@@ -716,7 +790,16 @@
     save(); renderUnits();
   }
 
-  /* ── Add log entry ── */
+  /* ── Add type ── */
+  function addType() {
+    const input = document.getElementById('newTypeInput');
+    const name  = input.value.trim();
+    if (!name) return;
+    if (types.includes(name)) { input.select(); return; }
+    types.push(name);
+    input.value = '';
+    save(); renderTypes();
+  }
   function addEntry() {
     const zeit   = document.getElementById('fZeit').value   || nowTime();
     const von    = document.getElementById('fVon').value;
@@ -766,6 +849,17 @@
     save(); renderUnits();
   });
 
+  document.getElementById('btnAddType').addEventListener('click', addType);
+  document.getElementById('newTypeInput').addEventListener('keydown', e => { if (e.key === 'Enter') addType(); });
+
+  document.getElementById('typeList').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-del-type');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    types.splice(i, 1);
+    save(); renderTypes();
+  });
+
   document.getElementById('btnLog').addEventListener('click', addEntry);
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
 
@@ -773,7 +867,7 @@
     resetZeitAuto();
     document.getElementById('fVon').value    = '';
     document.getElementById('fAn').value     = '';
-    document.getElementById('fArt').value    = 'Anforderung';
+    if (types.length) document.getElementById('fArt').selectedIndex = 0;
     document.getElementById('fInhalt').value = '';
   });
 
@@ -807,6 +901,7 @@
   /* ── Init ── */
   load().then(() => {
     renderUnits();
+    renderTypes();
     renderLog();
     /* fZeit is kept up-to-date by tickClock (already called above) */
   });
