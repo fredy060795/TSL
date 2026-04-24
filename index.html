@@ -60,6 +60,37 @@
       letter-spacing: 2px;
       font-weight: bold;
     }
+    .save-status {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-align: right;
+      margin-top: 2px;
+    }
+    .save-status.ok  { color: #4a9a4a; }
+    .save-status.err { color: var(--red); }
+
+    /* ── Language switcher ── */
+    .lang-switch {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-left: 16px;
+    }
+    .btn-lang {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 7px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .btn-lang:hover { border-color: var(--accent); color: var(--text); }
+    .btn-lang.active { border-color: var(--accent); color: var(--accent); background: #1e2a10; }
 
     /* ── Layout ── */
     .layout {
@@ -142,6 +173,107 @@
       line-height: 1;
     }
     .btn-add-unit:hover { background: var(--accent); }
+
+    /* ── Types section in sidebar ── */
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 0;
+    }
+    .type-list {
+      list-style: none;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .type-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px;
+      border-radius: 3px;
+      cursor: default;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .type-list li:hover { background: #2d3228; }
+    .type-list li .type-name { flex: 1; font-size: 12px; }
+    .type-list li.type-default .type-name { color: var(--text-dim); font-style: italic; }
+    .type-list li .btn-del-type {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .type-list li .btn-del-type:hover { color: var(--red); }
+
+    /* ── Unit status badges ── */
+    .unit-status {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: bold;
+      padding: 1px 5px;
+      border-radius: 2px;
+      cursor: pointer;
+      user-select: none;
+      margin-right: 4px;
+      border: 1px solid transparent;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .unit-status:hover { opacity: 0.75; }
+    .status-active  { background: #1a3a1a; color: #7ad07a; border-color: #3a6a3a; }
+    .status-base    { background: #1a2a4a; color: #7ab4e8; border-color: #2a4a7a; }
+    .status-kia     { background: #4a1a1a; color: #e87a7a; border-color: #7a2a2a; }
+    .status-unknown { background: #2a2a2a; color: #909090; border-color: #444444; }
+    .unit-list li.kia-unit .unit-name { opacity: 0.4; text-decoration: line-through; }
+
+    /* ── Lagebild (status overview panel) ── */
+    .lagebild {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .lagebild-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+    .lagebild-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 3px;
+      font-size: 11px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.15s;
+    }
+    .lagebild-chip:hover { opacity: 0.8; }
+    .lagebild-chip .chip-name   { font-weight: bold; }
+    .lagebild-chip .chip-status { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
+    .chip-active  { background: #1a3a1a; border-color: #3a6a3a; color: #7ad07a; }
+    .chip-base    { background: #1a2a4a; border-color: #2a4a7a; color: #7ab4e8; }
+    .chip-kia     { background: #4a1a1a; border-color: #7a2a2a; color: #e87a7a; }
+    .chip-kia .chip-name { text-decoration: line-through; opacity: 0.6; }
+    .chip-unknown { background: #2a2a2a; border-color: #444444; color: #909090; }
+    .lagebild-empty { color: var(--text-dim); font-size: 11px; font-style: italic; }
+
+    /* badge for auto-logged status events */
+    .badge-statusmeldung { background: #2a1040; color: #c07ae8; }
 
     /* ── Main Content ── */
     .main {
@@ -366,20 +498,37 @@
 <header>
   <div>
     <h1>TSL &mdash; Tactical Situation Log</h1>
-    <div class="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+    <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
   </div>
-  <div class="clock" id="clock">00:00:00</div>
+  <div class="lang-switch">
+    <button class="btn-lang active" data-lang="de">DE</button>
+    <button class="btn-lang" data-lang="en">EN</button>
+    <button class="btn-lang" data-lang="cz">CZ</button>
+  </div>
+  <div style="text-align:right;">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
+  </div>
 </header>
 
 <div class="layout">
 
   <!-- Unit Sidebar -->
   <aside class="sidebar">
-    <h2>Einheiten</h2>
+    <h2 data-i18n="sidebarUnits">Einheiten</h2>
     <ul class="unit-list" id="unitList"></ul>
     <div class="add-unit-form">
-      <input type="text" id="newUnitInput" placeholder="Einheit…" maxlength="30" />
-      <button class="btn-add-unit" id="btnAddUnit" title="Einheit hinzufügen">+</button>
+      <input type="text" id="newUnitInput" data-i18n-ph="unitPlaceholder" placeholder="Einheit…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddUnit" data-i18n-title="btnAddUnitTitle" title="Einheit hinzufügen">+</button>
+    </div>
+
+    <hr class="sidebar-divider" />
+
+    <h2 data-i18n="sidebarTypes">Ereignisarten</h2>
+    <ul class="type-list" id="typeList"></ul>
+    <div class="add-unit-form">
+      <input type="text" id="newTypeInput" data-i18n-ph="typePlaceholder" placeholder="Neue Art…" maxlength="30" />
+      <button class="btn-add-unit" id="btnAddType" data-i18n-title="btnAddTypeTitle" title="Ereignisart hinzufügen">+</button>
     </div>
   </aside>
 
@@ -388,57 +537,56 @@
 
     <!-- Entry Form -->
     <div class="entry-form">
-      <h2>Neuer Eintrag</h2>
+      <h2 data-i18n="formTitle">Neuer Eintrag</h2>
       <div class="form-row">
 
         <div class="form-group fg-zeit">
-          <label>Zeit</label>
+          <label data-i18n="labelZeit">Zeit</label>
           <input type="time" id="fZeit" />
         </div>
 
         <div class="form-group fg-von">
-          <label>Von</label>
+          <label data-i18n="labelVon">Von</label>
           <select id="fVon">
             <option value="">– Von –</option>
           </select>
         </div>
 
         <div class="form-group fg-an">
-          <label>An</label>
+          <label data-i18n="labelAn">An</label>
           <select id="fAn">
             <option value="">– An –</option>
           </select>
         </div>
 
         <div class="form-group fg-art">
-          <label>Art</label>
-          <select id="fArt">
-            <option value="Anforderung">Anforderung</option>
-            <option value="Truppenmeldung">Truppenmeldung</option>
-            <option value="Feindmeldung">Feindmeldung</option>
-            <option value="Meldung">Meldung</option>
-            <option value="Sonstiges">Sonstiges</option>
-          </select>
+          <label data-i18n="labelArt">Art</label>
+          <select id="fArt"></select>
         </div>
 
         <div class="form-group fg-inhalt">
-          <label>Inhalt</label>
-          <input type="text" id="fInhalt" placeholder="Meldungsinhalt…" maxlength="200" />
+          <label data-i18n="labelInhalt">Inhalt</label>
+          <input type="text" id="fInhalt" data-i18n-ph="inhaltPlaceholder" placeholder="Meldungsinhalt…" maxlength="200" />
         </div>
 
-        <button class="btn-log" id="btnLog">Eintragen</button>
-        <button class="btn-reset" id="btnReset" title="Formular zurücksetzen">↺</button>
+        <button class="btn-log" id="btnLog" data-i18n="btnLog">Eintragen</button>
+        <button class="btn-reset" id="btnReset" data-i18n-title="btnResetTitle" title="Formular zurücksetzen">↺</button>
       </div>
+    </div>
+
+    <!-- Lagebild (unit status overview) -->
+    <div class="lagebild" id="lagebild">
+      <span class="lagebild-title" data-i18n="lagebild">Lagebild</span>
     </div>
 
     <!-- Log Table -->
     <div class="log-section">
       <div class="log-header">
-        <h2>Lagetagebuch</h2>
+        <h2 data-i18n="logTitle">Lagetagebuch</h2>
         <div style="display:flex;align-items:center;gap:4px;">
           <span class="log-count" id="logCount">0 Einträge</span>
-          <button class="btn-export" id="btnExport" title="Als CSV exportieren">⬇ Export</button>
-          <button class="btn-clear-log" id="btnClear" title="Alle Einträge löschen">✕ Leeren</button>
+          <button class="btn-export" id="btnExport" data-i18n="btnExport" data-i18n-title="btnExportTitle" title="Als CSV exportieren">⬇ Export</button>
+          <button class="btn-clear-log" id="btnClear" data-i18n="btnClear" data-i18n-title="btnClearTitle" title="Alle Einträge löschen">✕ Leeren</button>
         </div>
       </div>
 
@@ -446,12 +594,12 @@
         <table id="logTable">
           <thead>
             <tr>
-              <th class="td-nr">Nr</th>
-              <th class="td-zeit">Zeit</th>
-              <th class="td-von">Von</th>
-              <th class="td-an">An</th>
-              <th class="td-art">Art</th>
-              <th class="td-inhalt">Inhalt</th>
+              <th class="td-nr" data-i18n="thNr">Nr</th>
+              <th class="td-zeit" data-i18n="thZeit">Zeit</th>
+              <th class="td-von" data-i18n="thVon">Von</th>
+              <th class="td-an" data-i18n="thAn">An</th>
+              <th class="td-art" data-i18n="thArt">Art</th>
+              <th class="td-inhalt" data-i18n="thInhalt">Inhalt</th>
               <th class="td-del"></th>
             </tr>
           </thead>
@@ -468,51 +616,380 @@
 <script>
   /* ── State ── */
   const DEFAULT_UNITS = ['FüGr', 'Zug 1', 'Zug 2', 'Zug 3', 'San', 'Kp', 'Btl', 'Lage'];
-  let units = [];
-  let log   = [];
+  const DEFAULT_TYPES = ['Anforderung', 'Truppenmeldung', 'Feindmeldung', 'Meldung', 'Sonstiges'];
 
-  /* ── Persist ── */
-  function save() {
-    localStorage.setItem('tsl_units', JSON.stringify(units));
-    localStorage.setItem('tsl_log',   JSON.stringify(log));
+  /* ── i18n ── */
+  const LANGS = {
+    de: {
+      subtitle:        'Lagemeldung \u2022 Funkverkehr \u2022 Echtzeit',
+      sidebarUnits:    'Einheiten',
+      unitPlaceholder: 'Einheit\u2026',
+      btnAddUnitTitle: 'Einheit hinzuf\u00fcgen',
+      sidebarTypes:    'Ereignisarten',
+      typePlaceholder: 'Neue Art\u2026',
+      btnAddTypeTitle: 'Ereignisart hinzuf\u00fcgen',
+      formTitle:       'Neuer Eintrag',
+      labelZeit:       'Zeit',       labelVon:  'Von',
+      labelAn:         'An',         labelArt:  'Art',
+      labelInhalt:     'Inhalt',
+      optVon:          '\u2013 Von \u2013',
+      optAn:           '\u2013 An \u2013',
+      inhaltPlaceholder: 'Meldungsinhalt\u2026',
+      btnLog:          'Eintragen',
+      btnResetTitle:   'Formular zur\u00fccksetzen',
+      logTitle:        'Lagetagebuch',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Als CSV exportieren',
+      btnClear:        '\u2715 Leeren',
+      btnClearTitle:   'Alle Eintr\u00e4ge l\u00f6schen',
+      thNr: 'Nr', thZeit: 'Zeit', thVon: 'Von', thAn: 'An', thArt: 'Art', thInhalt: 'Inhalt',
+      emptyState:      'Noch keine Eintr\u00e4ge vorhanden.',
+      saveLoading:     'L\u00e4dt\u2026',
+      saveOk:          '\u2714 Gespeichert ',
+      saveErr:         '\u26a0 Speichern fehlgeschlagen \u2013 Fallback aktiv',
+      entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
+      remove:          'Entfernen',  typeDefault: 'Standard',
+      delRow:          'Eintrag l\u00f6schen',
+      zeitManual:      'Manuelle Zeit \u2013 \u21ba Reset zum Zur\u00fccksetzen',
+      confirmDel:      'Eintrag #{n} l\u00f6schen?',
+      confirmClear:    'Alle {n} Eintr\u00e4ge l\u00f6schen?',
+      csvHeader:       'Nr;Zeit;Von;An;Art;Inhalt',
+      typeNames: { 'Anforderung':'Anforderung','Truppenmeldung':'Truppenmeldung',
+                   'Feindmeldung':'Feindmeldung','Meldung':'Meldung','Sonstiges':'Sonstiges' },
+      lagebild:        'Lagebild',
+      status_active:   'Aktiv',
+      status_base:     'Basis',
+      status_kia:      'KIA',
+      status_unknown:  'Unbek.',
+      statusAutoLog:   'Status: {old} \u2192 {new}',
+      lagebild_empty:  'Keine Einheiten.',
+    },
+    en: {
+      subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
+      sidebarUnits:    'Units',
+      unitPlaceholder: 'Unit\u2026',
+      btnAddUnitTitle: 'Add unit',
+      sidebarTypes:    'Event types',
+      typePlaceholder: 'New type\u2026',
+      btnAddTypeTitle: 'Add event type',
+      formTitle:       'New entry',
+      labelZeit:       'Time',       labelVon:  'From',
+      labelAn:         'To',         labelArt:  'Type',
+      labelInhalt:     'Content',
+      optVon:          '\u2013 From \u2013',
+      optAn:           '\u2013 To \u2013',
+      inhaltPlaceholder: 'Message content\u2026',
+      btnLog:          'Submit',
+      btnResetTitle:   'Reset form',
+      logTitle:        'Situation Log',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Export as CSV',
+      btnClear:        '\u2715 Clear',
+      btnClearTitle:   'Delete all entries',
+      thNr: 'No', thZeit: 'Time', thVon: 'From', thAn: 'To', thArt: 'Type', thInhalt: 'Content',
+      emptyState:      'No entries yet.',
+      saveLoading:     'Loading\u2026',
+      saveOk:          '\u2714 Saved ',
+      saveErr:         '\u26a0 Save failed \u2013 fallback active',
+      entry1:          ' entry',     entryN: ' entries',
+      remove:          'Remove',     typeDefault: 'Default',
+      delRow:          'Delete entry',
+      zeitManual:      'Manual time \u2013 \u21ba Reset to restore',
+      confirmDel:      'Delete entry #{n}?',
+      confirmClear:    'Delete all {n} entries?',
+      csvHeader:       'No;Time;From;To;Type;Content',
+      typeNames: { 'Anforderung':'Request','Truppenmeldung':'Troops report',
+                   'Feindmeldung':'Enemy report','Meldung':'Report','Sonstiges':'Other' },
+      lagebild:        'Status Board',
+      status_active:   'Active',
+      status_base:     'Base',
+      status_kia:      'KIA',
+      status_unknown:  'Unkn.',
+      statusAutoLog:   'Status: {old} \u2192 {new}',
+      lagebild_empty:  'No units.',
+    },
+    cz: {
+      subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
+      sidebarUnits:    'Jednotky',
+      unitPlaceholder: 'Jednotka\u2026',
+      btnAddUnitTitle: 'P\u0159idat jednotku',
+      sidebarTypes:    'Typy ud\u00e1lost\u00ed',
+      typePlaceholder: 'Nov\u00fd typ\u2026',
+      btnAddTypeTitle: 'P\u0159idat typ ud\u00e1losti',
+      formTitle:       'Nov\u00fd z\u00e1znam',
+      labelZeit:       '\u010cas',    labelVon:  'Od',
+      labelAn:         'Pro',         labelArt:  'Typ',
+      labelInhalt:     'Obsah',
+      optVon:          '\u2013 Od \u2013',
+      optAn:           '\u2013 Pro \u2013',
+      inhaltPlaceholder: 'Obsah hl\u00e1šen\u00ed\u2026',
+      btnLog:          'Zapsat',
+      btnResetTitle:   'Resetovat formul\u00e1\u0159',
+      logTitle:        'Den\u00edk situace',
+      btnExport:       '\u2b07 Export',
+      btnExportTitle:  'Exportovat jako CSV',
+      btnClear:        '\u2715 Vymazat',
+      btnClearTitle:   'Smazat v\u0161echny z\u00e1znamy',
+      thNr: 'Nr', thZeit: '\u010cas', thVon: 'Od', thAn: 'Pro', thArt: 'Typ', thInhalt: 'Obsah',
+      emptyState:      '\u017d\u00e1dn\u00e9 z\u00e1znamy.',
+      saveLoading:     'Na\u010d\u00edt\u00e1m\u2026',
+      saveOk:          '\u2714 Ulo\u017eeno ',
+      saveErr:         '\u26a0 Ulo\u017een\u00ed selhalo \u2013 z\u00e1loha aktivn\u00ed',
+      entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
+      remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
+      delRow:          'Smazat z\u00e1znam',
+      zeitManual:      'Ru\u010dn\u00ed \u010das \u2013 \u21ba Reset pro obnoven\u00ed',
+      confirmDel:      'Smazat z\u00e1znam #{n}?',
+      confirmClear:    'Smazat v\u0161echny {n} z\u00e1znamy?',
+      csvHeader:       'Nr;\u010cas;Od;Pro;Typ;Obsah',
+      typeNames: { 'Anforderung':'Po\u017eadavek','Truppenmeldung':'Hl\u00e1šen\u00ed vojsk',
+                   'Feindmeldung':'Hl\u00e1šen\u00ed nep\u0159\u00edtele','Meldung':'Hl\u00e1šen\u00ed','Sonstiges':'Ostatn\u00ed' },
+      lagebild:        'P\u0159ehled stavu',
+      status_active:   'Aktivn\u00ed',
+      status_base:     'Z\u00e1kladna',
+      status_kia:      'KIA',
+      status_unknown:  'Nezn.',
+      statusAutoLog:   'Stav: {old} \u2192 {new}',
+      lagebild_empty:  '\u017d\u00e1dn\u00e9 jednotky.',
+    },
+  };
+
+  let lang = localStorage.getItem('tsl_lang') || 'de';
+
+  function t(key) {
+    return (LANGS[lang] && LANGS[lang][key] !== undefined ? LANGS[lang][key] : null) ||
+           (LANGS.de[key] !== undefined ? LANGS.de[key] : key);
   }
-  function load() {
+
+  /* Translate a type name for display (only for built-in default types) */
+  function tType(name) {
+    return (LANGS[lang].typeNames && LANGS[lang].typeNames[name]) || name;
+  }
+
+  /* Apply current language to all static data-i18n elements */
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      /* Skip live-updated elements (saveStatus is managed by setSaveStatus) */
+      if (el.id === 'saveStatus') return;
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.placeholder = t(el.dataset.i18nPh);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = t(el.dataset.i18nTitle);
+    });
+    /* Active lang button highlight */
+    document.querySelectorAll('.btn-lang').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    /* Re-render dynamic parts that contain translated strings */
+    renderUnits();
+    renderTypes();
+    renderLagebild();
+    renderLog();
+    /* Re-apply save status in new language */
+    setSaveStatus(lastSaveOk);
+  }
+  let units = [];
+  let types = [];
+  let log   = [];
+  let unitStatuses = {};   /* { unitName: 'active'|'base'|'kia'|'unknown' } */
+  const STATUSES = ['active', 'base', 'kia', 'unknown'];
+
+  /* ── IndexedDB (primary persistent storage) ── */
+  const IDB_NAME    = 'tsl_db';
+  const IDB_VERSION = 1;
+  const IDB_STORE   = 'data';
+
+  let idbAvailable = true;   /* tracks whether IDB works at runtime */
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE);
+        }
+      };
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  function idbGet(store, key) {
+    return new Promise((resolve, reject) => {
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = () => {
+        console.error('IDB get failed for key "' + key + '":', req.error);
+        reject(req.error);
+      };
+    });
+  }
+
+  async function saveToIDB() {
     try {
-      const parsedUnits = JSON.parse(localStorage.getItem('tsl_units'));
-      units = parsedUnits !== null ? parsedUnits : DEFAULT_UNITS.slice();
+      const db  = await openDB();
+      const tx  = db.transaction(IDB_STORE, 'readwrite');
+      const st  = tx.objectStore(IDB_STORE);
+      st.put(units,         'units');
+      st.put(types,         'types');
+      st.put(log,           'log');
+      st.put(unitStatuses,  'unitStatuses');
+      st.put(Date.now(),    'lastSaved');
+      await new Promise((res, rej) => {
+        tx.oncomplete = res;
+        tx.onerror    = () => rej(tx.error);
+      });
+      idbAvailable = true;
+      setSaveStatus(true);
+    } catch(e) {
+      idbAvailable = false;
+      console.error('IDB save failed:', e);
+      setSaveStatus(false);
     }
-    catch(e) { units = DEFAULT_UNITS.slice(); }
+  }
+
+  async function loadFromIDB() {
     try {
-      const parsedLog = JSON.parse(localStorage.getItem('tsl_log'));
-      log = parsedLog !== null ? parsedLog : [];
+      const db   = await openDB();
+      const tx   = db.transaction(IDB_STORE, 'readonly');
+      const st   = tx.objectStore(IDB_STORE);
+      const [u, t, l, us, ts] = await Promise.all([
+        idbGet(st, 'units'),
+        idbGet(st, 'types'),
+        idbGet(st, 'log'),
+        idbGet(st, 'unitStatuses'),
+        idbGet(st, 'lastSaved'),
+      ]);
+      return { units: u, types: t, log: l, unitStatuses: us, lastSaved: ts };
+    } catch(e) {
+      console.error('IDB load failed:', e);
+      return null;
     }
-    catch(e) { log = []; }
+  }
+
+  /* ── Save-status indicator ── */
+  let lastSaveOk = null;   /* null=loading, true=ok, false=err */
+
+  function setSaveStatus(ok) {
+    lastSaveOk = ok;
+    const el = document.getElementById('saveStatus');
+    if (ok === true) {
+      const now = new Date();
+      const ts  = String(now.getHours()).padStart(2,'0') + ':' +
+                  String(now.getMinutes()).padStart(2,'0') + ':' +
+                  String(now.getSeconds()).padStart(2,'0');
+      el.textContent = t('saveOk') + ts;
+      el.className   = 'save-status ok';
+    } else if (ok === false) {
+      el.textContent = t('saveErr');
+      el.className   = 'save-status err';
+    } else {
+      el.textContent = t('saveLoading');
+      el.className   = 'save-status';
+    }
+  }
+
+  /* ── Persist (writes to both IDB and localStorage) ── */
+  function save() {
+    /* Synchronous localStorage fallback – always written first */
+    try {
+      localStorage.setItem('tsl_units',        JSON.stringify(units));
+      localStorage.setItem('tsl_types',        JSON.stringify(types));
+      localStorage.setItem('tsl_log',          JSON.stringify(log));
+      localStorage.setItem('tsl_unitStatuses', JSON.stringify(unitStatuses));
+      localStorage.setItem('tsl_lang',         lang);
+    } catch(e) { console.warn('localStorage write failed:', e); }
+    /* Async IndexedDB primary storage */
+    saveToIDB();
+  }
+
+  function ensureUnitStatuses() {
+    units.forEach(u => { if (!unitStatuses[u]) unitStatuses[u] = 'active'; });
+  }
+
+  async function load() {
+    /* 1. Try IndexedDB (primary) */
+    const idb = await loadFromIDB();
+    if (idb && idb.units !== undefined && idb.log !== undefined) {
+      units        = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      types        = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
+      log          = Array.isArray(idb.log)   ? idb.log   : [];
+      unitStatuses = (idb.unitStatuses && typeof idb.unitStatuses === 'object') ? idb.unitStatuses : {};
+      ensureUnitStatuses();
+      if (idb.lastSaved) setSaveStatus(true);
+      return;
+    }
+    /* 2. Fallback: localStorage */
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_units'));
+      units = p !== null ? p : DEFAULT_UNITS.slice();
+    } catch(e) { units = DEFAULT_UNITS.slice(); }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_types'));
+      types = p !== null ? p : DEFAULT_TYPES.slice();
+    } catch(e) { types = DEFAULT_TYPES.slice(); }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_log'));
+      log = p !== null ? p : [];
+    } catch(e) { log = []; }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_unitStatuses'));
+      unitStatuses = (p && typeof p === 'object') ? p : {};
+    } catch(e) { unitStatuses = {}; }
+    ensureUnitStatuses();
+    /* Migrate into IDB */
+    if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
   }
 
   /* ── Clock ── */
-  function tickClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent =
-      String(now.getHours()).padStart(2,'0') + ':' +
-      String(now.getMinutes()).padStart(2,'0') + ':' +
-      String(now.getSeconds()).padStart(2,'0');
-  }
-  setInterval(tickClock, 1000);
-  tickClock();
+  let fZeitManual = false;   /* true = user has overridden the time field */
 
   function nowTime() {
     const d = new Date();
     return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
   }
 
+  function resetZeitAuto() {
+    fZeitManual = false;
+    const el = document.getElementById('fZeit');
+    el.value = nowTime();
+    el.title = '';
+    el.style.borderColor = '';
+  }
+
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      String(now.getHours()).padStart(2,'0') + ':' +
+      String(now.getMinutes()).padStart(2,'0') + ':' +
+      String(now.getSeconds()).padStart(2,'0');
+    /* Keep the form time field in sync unless the user has changed it manually */
+    if (!fZeitManual) {
+      document.getElementById('fZeit').value = nowTime();
+    }
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
   /* ── Render units ── */
   function renderUnits() {
     const list = document.getElementById('unitList');
     list.innerHTML = '';
     units.forEach((u, i) => {
+      const status = unitStatuses[u] || 'active';
       const li = document.createElement('li');
-      li.innerHTML = `<span class="unit-name">${escHtml(u)}</span>
-        <button class="btn-del-unit" data-i="${i}" title="Entfernen">✕</button>`;
+      if (status === 'kia') li.classList.add('kia-unit');
+      li.innerHTML =
+        `<button class="unit-status status-${status}" data-unit="${escHtml(u)}" title="${escHtml(t('statusAutoLog').replace('{old}','').replace('{new}','…'))}">` +
+          `${escHtml(t('status_' + status))}` +
+        `</button>` +
+        `<span class="unit-name">${escHtml(u)}</span>` +
+        `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
     });
 
@@ -520,8 +997,8 @@
     const fAn  = document.getElementById('fAn');
     const prevVon = fVon.value, prevAn = fAn.value;
 
-    fVon.innerHTML = '<option value="">– Von –</option>';
-    fAn.innerHTML  = '<option value="">– An –</option>';
+    fVon.innerHTML = `<option value="">${escHtml(t('optVon'))}</option>`;
+    fAn.innerHTML  = `<option value="">${escHtml(t('optAn'))}</option>`;
     units.forEach(u => {
       fVon.insertAdjacentHTML('beforeend', `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
       fAn.insertAdjacentHTML('beforeend',  `<option value="${escHtml(u)}">${escHtml(u)}</option>`);
@@ -531,14 +1008,86 @@
     if (prevAn)  fAn.value  = prevAn;
   }
 
+  /* ── Render types ── */
+  function renderTypes() {
+    const list  = document.getElementById('typeList');
+    const fArt  = document.getElementById('fArt');
+    const prev  = fArt.value;
+
+    list.innerHTML = '';
+    types.forEach((ty, i) => {
+      const isDefault = DEFAULT_TYPES.includes(ty);
+      const li = document.createElement('li');
+      if (isDefault) li.classList.add('type-default');
+      li.innerHTML = `<span class="type-name">${escHtml(tType(ty))}</span>` +
+        (isDefault
+          ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`
+          : `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`);
+      list.appendChild(li);
+    });
+
+    fArt.innerHTML = '';
+    types.forEach(ty => {
+      fArt.insertAdjacentHTML('beforeend', `<option value="${escHtml(ty)}">${escHtml(tType(ty))}</option>`);
+    });
+
+    if (prev && types.includes(prev)) fArt.value = prev;
+  }
+
+  /* ── Render Lagebild (status overview) ── */
+  function renderLagebild() {
+    const panel = document.getElementById('lagebild');
+    /* Remove old chips, keep the title span */
+    panel.querySelectorAll('.lagebild-chip, .lagebild-empty').forEach(el => el.remove());
+
+    if (units.length === 0) {
+      panel.insertAdjacentHTML('beforeend',
+        `<span class="lagebild-empty">${escHtml(t('lagebild_empty'))}</span>`);
+      return;
+    }
+    units.forEach(u => {
+      const status = unitStatuses[u] || 'active';
+      const chip = document.createElement('div');
+      chip.className = `lagebild-chip chip-${status}`;
+      chip.dataset.unit = u;
+      chip.title = u + ': ' + t('status_' + status);
+      chip.innerHTML =
+        `<span class="chip-name">${escHtml(u)}</span>` +
+        `<span class="chip-status">${escHtml(t('status_' + status))}</span>`;
+      panel.appendChild(chip);
+    });
+  }
+
+  /* ── Set unit status (cycles on click, auto-logs change) ── */
+  function setUnitStatus(unitName) {
+    const current = unitStatuses[unitName] || 'active';
+    const next    = STATUSES[(STATUSES.indexOf(current) + 1) % STATUSES.length];
+    const oldLabel = t('status_' + current);
+    const newLabel = t('status_' + next);
+    unitStatuses[unitName] = next;
+    /* Auto-log the status change */
+    log.push({
+      zeit:   nowTime(),
+      von:    unitName,
+      an:     '',
+      art:    'Statusmeldung',
+      inhalt: t('statusAutoLog').replace('{old}', oldLabel).replace('{new}', newLabel),
+    });
+    save();
+    renderUnits();
+    renderLagebild();
+    renderLog();
+  }
+
   /* ── Render log ── */
   function badgeClass(art) {
     const map = {
-      'Anforderung':   'badge-anforderung',
-      'Truppenmeldung':'badge-truppen',
-      'Feindmeldung':  'badge-feind',
-      'Meldung':       'badge-meldung',
-      'Sonstiges':     'badge-sonstiges',
+      'Anforderung':    'badge-anforderung',
+      'Truppenmeldung': 'badge-truppen',
+      'Feindmeldung':   'badge-feind',
+      'Meldung':        'badge-meldung',
+      'Sonstiges':      'badge-sonstiges',
+      'Statusmeldung':  'badge-statusmeldung',
     };
     return map[art] || 'badge-sonstiges';
   }
@@ -546,10 +1095,10 @@
   function renderLog() {
     const tbody = document.getElementById('logBody');
     const count = document.getElementById('logCount');
-    count.textContent = log.length + (log.length === 1 ? ' Eintrag' : ' Einträge');
+    count.textContent = log.length + (log.length === 1 ? t('entry1') : t('entryN'));
 
     if (log.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Noch keine Einträge vorhanden.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${escHtml(t('emptyState'))}</td></tr>`;
       return;
     }
     tbody.innerHTML = '';
@@ -562,11 +1111,10 @@
         <td class="td-an">${escHtml(e.an)}</td>
         <td class="td-art"><span class="badge ${badgeClass(e.art)}">${escHtml(e.art)}</span></td>
         <td class="td-inhalt">${escHtml(e.inhalt)}</td>
-        <td class="td-del"><button class="btn-del-row" data-i="${i}" title="Eintrag löschen">✕</button></td>
+        <td class="td-del"><button class="btn-del-row" data-i="${i}" title="${escHtml(t('delRow'))}">✕</button></td>
       `;
       tbody.appendChild(tr);
     });
-    // scroll to bottom
     const wrap = document.querySelector('.table-wrap');
     wrap.scrollTop = wrap.scrollHeight;
   }
@@ -585,11 +1133,21 @@
     if (!name) return;
     if (units.includes(name)) { input.select(); return; }
     units.push(name);
+    unitStatuses[name] = 'active';
     input.value = '';
-    save(); renderUnits();
+    save(); renderUnits(); renderLagebild();
   }
 
-  /* ── Add log entry ── */
+  /* ── Add type ── */
+  function addType() {
+    const input = document.getElementById('newTypeInput');
+    const name  = input.value.trim();
+    if (!name) return;
+    if (types.includes(name)) { input.select(); return; }
+    types.push(name);
+    input.value = '';
+    save(); renderTypes();
+  }
   function addEntry() {
     const zeit   = document.getElementById('fZeit').value   || nowTime();
     const von    = document.getElementById('fVon').value;
@@ -606,8 +1164,8 @@
     log.push({ zeit, von, an, art, inhalt });
     save(); renderLog();
 
-    // reset form
-    document.getElementById('fZeit').value   = nowTime();
+    // reset form – time resumes auto-tracking
+    resetZeitAuto();
     document.getElementById('fInhalt').value = '';
     document.getElementById('fVon').focus();
   }
@@ -615,7 +1173,7 @@
   /* ── Export CSV ── */
   function exportCSV() {
     if (log.length === 0) return;
-    const header = 'Nr;Zeit;Von;An;Art;Inhalt\n';
+    const header = t('csvHeader') + '\n';
     const rows   = log.map((e, i) =>
       [i+1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
     ).join('\n');
@@ -628,33 +1186,74 @@
   }
 
   /* ── Event wiring ── */
+  /* Language switcher */
+  document.querySelectorAll('.btn-lang').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem('tsl_lang', lang);
+      applyLang();
+    });
+  });
+
   document.getElementById('btnAddUnit').addEventListener('click', addUnit);
   document.getElementById('newUnitInput').addEventListener('keydown', e => { if (e.key === 'Enter') addUnit(); });
 
   document.getElementById('unitList').addEventListener('click', e => {
-    const btn = e.target.closest('.btn-del-unit');
+    /* Status badge click – cycle status */
+    const statusBtn = e.target.closest('.unit-status');
+    if (statusBtn) { setUnitStatus(statusBtn.dataset.unit); return; }
+    /* Delete button */
+    const delBtn = e.target.closest('.btn-del-unit');
+    if (!delBtn) return;
+    const i = parseInt(delBtn.dataset.i, 10);
+    const name = units[i];
+    units.splice(i, 1);
+    delete unitStatuses[name];
+    save(); renderUnits(); renderLagebild();
+  });
+
+  document.getElementById('btnAddType').addEventListener('click', addType);
+  document.getElementById('newTypeInput').addEventListener('keydown', e => { if (e.key === 'Enter') addType(); });
+
+  document.getElementById('typeList').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-del-type');
     if (!btn) return;
     const i = parseInt(btn.dataset.i, 10);
-    units.splice(i, 1);
-    save(); renderUnits();
+    types.splice(i, 1);
+    save(); renderTypes();
+  });
+
+  /* Status click on Lagebild chips */
+  document.getElementById('lagebild').addEventListener('click', e => {
+    const chip = e.target.closest('.lagebild-chip');
+    if (!chip) return;
+    setUnitStatus(chip.dataset.unit);
   });
 
   document.getElementById('btnLog').addEventListener('click', addEntry);
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
 
   document.getElementById('btnReset').addEventListener('click', () => {
-    document.getElementById('fZeit').value   = nowTime();
+    resetZeitAuto();
     document.getElementById('fVon').value    = '';
     document.getElementById('fAn').value     = '';
-    document.getElementById('fArt').value    = 'Anforderung';
+    if (types.length) document.getElementById('fArt').selectedIndex = 0;
     document.getElementById('fInhalt').value = '';
+  });
+
+  /* Mark time as manually overridden as soon as the user edits it */
+  document.getElementById('fZeit').addEventListener('change', () => {
+    fZeitManual = true;
+    const el = document.getElementById('fZeit');
+    el.title = t('zeitManual');
+    el.style.borderColor = 'var(--orange)';
   });
 
   document.getElementById('logBody').addEventListener('click', e => {
     const btn = e.target.closest('.btn-del-row');
     if (!btn) return;
     const i = parseInt(btn.dataset.i, 10);
-    if (confirm('Eintrag #' + (i+1) + ' löschen?')) {
+    if (confirm(t('confirmDel').replace('{n}', i + 1))) {
       log.splice(i, 1);
       save(); renderLog();
     }
@@ -662,7 +1261,7 @@
 
   document.getElementById('btnClear').addEventListener('click', () => {
     if (log.length === 0) return;
-    if (confirm('Alle ' + log.length + ' Einträge löschen?')) {
+    if (confirm(t('confirmClear').replace('{n}', log.length))) {
       log = []; save(); renderLog();
     }
   });
@@ -670,10 +1269,9 @@
   document.getElementById('btnExport').addEventListener('click', exportCSV);
 
   /* ── Init ── */
-  load();
-  renderUnits();
-  renderLog();
-  document.getElementById('fZeit').value = nowTime();
+  load().then(() => {
+    applyLang();  /* sets lang, renders all panels, applies translations */
+  });
 </script>
 </body>
 </html>
