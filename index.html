@@ -231,6 +231,17 @@
     .status-unknown { background: #2a2a2a; color: #909090; border-color: #444444; }
     .unit-list li.kia-unit .unit-name { opacity: 0.4; text-decoration: line-through; }
 
+    /* ── Custom status color swatches in sidebar list ── */
+    .status-list-swatch {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      margin-right: 4px;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+
     /* ── Lagebild (status overview panel) ── */
     .lagebild {
       background: var(--panel);
@@ -530,6 +541,15 @@
       <input type="text" id="newTypeInput" data-i18n-ph="typePlaceholder" placeholder="Neue Art…" maxlength="30" />
       <button class="btn-add-unit" id="btnAddType" data-i18n-title="btnAddTypeTitle" title="Ereignisart hinzufügen">+</button>
     </div>
+
+    <hr class="sidebar-divider" />
+
+    <h2 data-i18n="sidebarStatuses">Statusarten</h2>
+    <ul class="type-list" id="statusList"></ul>
+    <div class="add-unit-form">
+      <input type="text" id="newStatusInput" data-i18n-ph="statusPlaceholder" placeholder="Neuer Status…" maxlength="20" />
+      <button class="btn-add-unit" id="btnAddStatus" data-i18n-title="btnAddStatusTitle" title="Status hinzufügen">+</button>
+    </div>
   </aside>
 
   <!-- Main -->
@@ -663,6 +683,9 @@
       status_unknown:  'Unbek.',
       statusAutoLog:   'Status: {old} \u2192 {new}',
       lagebild_empty:  'Keine Einheiten.',
+      sidebarStatuses:    'Statusarten',
+      statusPlaceholder:  'Neuer Status\u2026',
+      btnAddStatusTitle:  'Status hinzuf\u00fcgen',
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
@@ -707,6 +730,9 @@
       status_unknown:  'Unkn.',
       statusAutoLog:   'Status: {old} \u2192 {new}',
       lagebild_empty:  'No units.',
+      sidebarStatuses:    'Status types',
+      statusPlaceholder:  'New status\u2026',
+      btnAddStatusTitle:  'Add status',
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
@@ -751,6 +777,9 @@
       status_unknown:  'Nezn.',
       statusAutoLog:   'Stav: {old} \u2192 {new}',
       lagebild_empty:  '\u017d\u00e1dn\u00e9 jednotky.',
+      sidebarStatuses:    'Typy stav\u016f',
+      statusPlaceholder:  'Nov\u00fd stav\u2026',
+      btnAddStatusTitle:  'P\u0159idat stav',
     },
   };
 
@@ -787,6 +816,7 @@
     /* Re-render dynamic parts that contain translated strings */
     renderUnits();
     renderTypes();
+    renderStatuses();
     renderLagebild();
     renderLog();
     /* Re-apply save status in new language */
@@ -795,8 +825,44 @@
   let units = [];
   let types = [];
   let log   = [];
-  let unitStatuses = {};   /* { unitName: 'active'|'base'|'kia'|'unknown' } */
+  let unitStatuses   = {};   /* { unitName: 'active'|'base'|'kia'|'unknown'|'cs_...' } */
+  let customStatuses = [];   /* [{ id: 'cs_...', label: string }] */
   const STATUSES = ['active', 'base', 'kia', 'unknown'];
+
+  /* Palette for custom status colours (cycles when more than 5 custom statuses exist) */
+  const CUSTOM_PALETTE = [
+    { bg: '#3a2a10', color: '#e8c87a', border: '#6a4a20' },
+    { bg: '#2a103a', color: '#c87ae8', border: '#4a207a' },
+    { bg: '#103a3a', color: '#7ae8e8', border: '#207a7a' },
+    { bg: '#3a1030', color: '#e87ac8', border: '#7a2060' },
+    { bg: '#1a3a30', color: '#7ae8c8', border: '#2a7060' },
+  ];
+
+  /* Returns the palette entry for a custom status id, or null for built-in statuses */
+  function getCustomStyle(id) {
+    const idx = customStatuses.findIndex(s => s.id === id);
+    if (idx < 0) return null;
+    return CUSTOM_PALETTE[idx % CUSTOM_PALETTE.length];
+  }
+
+  /* Inline style string for a custom status (empty string for built-in) */
+  function statusInlineStyle(id) {
+    const p = getCustomStyle(id);
+    if (!p) return '';
+    return `background:${p.bg};color:${p.color};border-color:${p.border};`;
+  }
+
+  /* Display label for any status id */
+  function getStatusLabel(id) {
+    const cs = customStatuses.find(s => s.id === id);
+    if (cs) return cs.label;
+    return t('status_' + id) || id;
+  }
+
+  /* All active status ids (built-in + custom) */
+  function getEffectiveStatuses() {
+    return STATUSES.concat(customStatuses.map(s => s.id));
+  }
 
   /* ── IndexedDB (primary persistent storage) ── */
   const IDB_NAME    = 'tsl_db';
@@ -835,11 +901,12 @@
       const db  = await openDB();
       const tx  = db.transaction(IDB_STORE, 'readwrite');
       const st  = tx.objectStore(IDB_STORE);
-      st.put(units,         'units');
-      st.put(types,         'types');
-      st.put(log,           'log');
-      st.put(unitStatuses,  'unitStatuses');
-      st.put(Date.now(),    'lastSaved');
+      st.put(units,          'units');
+      st.put(types,          'types');
+      st.put(log,            'log');
+      st.put(unitStatuses,   'unitStatuses');
+      st.put(customStatuses, 'customStatuses');
+      st.put(Date.now(),     'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
         tx.onerror    = () => rej(tx.error);
@@ -858,14 +925,15 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, ts] = await Promise.all([
+      const [u, t, l, us, cs, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
         idbGet(st, 'unitStatuses'),
+        idbGet(st, 'customStatuses'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -898,11 +966,12 @@
   function save() {
     /* Synchronous localStorage fallback – always written first */
     try {
-      localStorage.setItem('tsl_units',        JSON.stringify(units));
-      localStorage.setItem('tsl_types',        JSON.stringify(types));
-      localStorage.setItem('tsl_log',          JSON.stringify(log));
-      localStorage.setItem('tsl_unitStatuses', JSON.stringify(unitStatuses));
-      localStorage.setItem('tsl_lang',         lang);
+      localStorage.setItem('tsl_units',          JSON.stringify(units));
+      localStorage.setItem('tsl_types',          JSON.stringify(types));
+      localStorage.setItem('tsl_log',            JSON.stringify(log));
+      localStorage.setItem('tsl_unitStatuses',   JSON.stringify(unitStatuses));
+      localStorage.setItem('tsl_customStatuses', JSON.stringify(customStatuses));
+      localStorage.setItem('tsl_lang',           lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
     saveToIDB();
@@ -916,10 +985,11 @@
     /* 1. Try IndexedDB (primary) */
     const idb = await loadFromIDB();
     if (idb && idb.units !== undefined && idb.log !== undefined) {
-      units        = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
-      types        = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
-      log          = Array.isArray(idb.log)   ? idb.log   : [];
-      unitStatuses = (idb.unitStatuses && typeof idb.unitStatuses === 'object') ? idb.unitStatuses : {};
+      units          = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      types          = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
+      log            = Array.isArray(idb.log)   ? idb.log   : [];
+      unitStatuses   = (idb.unitStatuses   && typeof idb.unitStatuses   === 'object') ? idb.unitStatuses   : {};
+      customStatuses = Array.isArray(idb.customStatuses) ? idb.customStatuses : [];
       ensureUnitStatuses();
       if (idb.lastSaved) setSaveStatus(true);
       return;
@@ -941,6 +1011,10 @@
       const p = JSON.parse(localStorage.getItem('tsl_unitStatuses'));
       unitStatuses = (p && typeof p === 'object') ? p : {};
     } catch(e) { unitStatuses = {}; }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_customStatuses'));
+      customStatuses = Array.isArray(p) ? p : [];
+    } catch(e) { customStatuses = []; }
     ensureUnitStatuses();
     /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
@@ -984,9 +1058,12 @@
       const status = unitStatuses[u] || 'active';
       const li = document.createElement('li');
       if (status === 'kia') li.classList.add('kia-unit');
+      const inlineStyle = statusInlineStyle(status);
+      const styleAttr   = inlineStyle ? ` style="${inlineStyle}"` : '';
+      const classAttr   = inlineStyle ? 'unit-status' : `unit-status status-${status}`;
       li.innerHTML =
-        `<button class="unit-status status-${status}" data-unit="${escHtml(u)}" title="${escHtml(t('statusAutoLog').replace('{old}','').replace('{new}','…'))}">` +
-          `${escHtml(t('status_' + status))}` +
+        `<button class="${classAttr}"${styleAttr} data-unit="${escHtml(u)}" title="${escHtml(t('statusAutoLog').replace('{old}','').replace('{new}','…'))}">` +
+          `${escHtml(getStatusLabel(status))}` +
         `</button>` +
         `<span class="unit-name">${escHtml(u)}</span>` +
         `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
@@ -1034,6 +1111,31 @@
     if (prev && types.includes(prev)) fArt.value = prev;
   }
 
+  /* ── Render status list ── */
+  function renderStatuses() {
+    const list = document.getElementById('statusList');
+    list.innerHTML = '';
+    /* Built-in statuses – not deletable */
+    STATUSES.forEach(id => {
+      const li = document.createElement('li');
+      li.classList.add('type-default');
+      li.innerHTML =
+        `<span class="type-name">${escHtml(getStatusLabel(id))}</span>` +
+        `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`;
+      list.appendChild(li);
+    });
+    /* Custom statuses – deletable */
+    customStatuses.forEach((cs, i) => {
+      const p  = CUSTOM_PALETTE[i % CUSTOM_PALETTE.length];
+      const li = document.createElement('li');
+      li.innerHTML =
+        `<span class="status-list-swatch" style="background:${p.bg};border-color:${p.border};"></span>` +
+        `<span class="type-name" style="color:${p.color};">${escHtml(cs.label)}</span>` +
+        `<button class="btn-del-type" data-id="${escHtml(cs.id)}" title="${escHtml(t('remove'))}">✕</button>`;
+      list.appendChild(li);
+    });
+  }
+
   /* ── Render Lagebild (status overview) ── */
   function renderLagebild() {
     const panel = document.getElementById('lagebild');
@@ -1048,22 +1150,26 @@
     units.forEach(u => {
       const status = unitStatuses[u] || 'active';
       const chip = document.createElement('div');
-      chip.className = `lagebild-chip chip-${status}`;
+      const inlineStyle = statusInlineStyle(status);
+      chip.className = inlineStyle ? 'lagebild-chip' : `lagebild-chip chip-${status}`;
+      if (inlineStyle) chip.style.cssText = inlineStyle;
       chip.dataset.unit = u;
-      chip.title = u + ': ' + t('status_' + status);
+      chip.title = u + ': ' + getStatusLabel(status);
       chip.innerHTML =
         `<span class="chip-name">${escHtml(u)}</span>` +
-        `<span class="chip-status">${escHtml(t('status_' + status))}</span>`;
+        `<span class="chip-status">${escHtml(getStatusLabel(status))}</span>`;
       panel.appendChild(chip);
     });
   }
 
   /* ── Set unit status (cycles on click, auto-logs change) ── */
   function setUnitStatus(unitName) {
-    const current = unitStatuses[unitName] || 'active';
-    const next    = STATUSES[(STATUSES.indexOf(current) + 1) % STATUSES.length];
-    const oldLabel = t('status_' + current);
-    const newLabel = t('status_' + next);
+    const effective = getEffectiveStatuses();
+    const current   = unitStatuses[unitName] || 'active';
+    const idx       = effective.indexOf(current);
+    const next      = effective[(idx >= 0 ? idx + 1 : 0) % effective.length];
+    const oldLabel  = getStatusLabel(current);
+    const newLabel  = getStatusLabel(next);
     unitStatuses[unitName] = next;
     /* Auto-log the status change */
     log.push({
@@ -1148,6 +1254,19 @@
     input.value = '';
     save(); renderTypes();
   }
+  let _csCounter = 0;
+
+  /* ── Add custom status ── */
+  function addCustomStatus() {
+    const input = document.getElementById('newStatusInput');
+    const label = input.value.trim();
+    if (!label) return;
+    if (customStatuses.some(s => s.label.toLowerCase() === label.toLowerCase())) { input.select(); return; }
+    customStatuses.push({ id: 'cs_' + Date.now() + '_' + (++_csCounter), label });
+    input.value = '';
+    save(); renderStatuses();
+  }
+
   function addEntry() {
     const zeit   = document.getElementById('fZeit').value   || nowTime();
     const von    = document.getElementById('fVon').value;
@@ -1221,6 +1340,21 @@
     const i = parseInt(btn.dataset.i, 10);
     types.splice(i, 1);
     save(); renderTypes();
+  });
+
+  document.getElementById('btnAddStatus').addEventListener('click', addCustomStatus);
+  document.getElementById('newStatusInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomStatus(); });
+
+  document.getElementById('statusList').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-del-type');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    customStatuses = customStatuses.filter(s => s.id !== id);
+    /* Reset any unit that used the deleted status back to 'active' */
+    Object.keys(unitStatuses).forEach(u => {
+      if (unitStatuses[u] === id) unitStatuses[u] = 'active';
+    });
+    save(); renderStatuses(); renderUnits(); renderLagebild();
   });
 
   /* Status click on Lagebild chips */
