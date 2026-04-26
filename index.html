@@ -854,7 +854,7 @@
   let customStatuses = [];   /* [{ id: 'cs_...', label: string }] */
   let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
   let builtinLabels   = {};  /* { id: customLabel } – overrides i18n labels for built-in statuses */
-  const STATUSES = ['active', 'base', 'kia', 'unknown'];
+  const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
 
   /* Palette for custom status colours (cycles when more than 5 custom statuses exist) */
   const CUSTOM_PALETTE = [
@@ -1030,7 +1030,7 @@
       log             = Array.isArray(idb.log)   ? idb.log   : [];
       unitStatuses    = (idb.unitStatuses   && typeof idb.unitStatuses   === 'object') ? idb.unitStatuses   : {};
       customStatuses  = Array.isArray(idb.customStatuses) ? idb.customStatuses : [];
-      builtinStatuses = Array.isArray(idb.builtinStatuses) ? idb.builtinStatuses : STATUSES.slice();
+      builtinStatuses = Array.isArray(idb.builtinStatuses) ? idb.builtinStatuses : DEFAULT_STATUSES.slice();
       builtinLabels   = (idb.builtinLabels && typeof idb.builtinLabels === 'object') ? idb.builtinLabels : {};
       ensureUnitStatuses();
       if (idb.lastSaved) setSaveStatus(true);
@@ -1059,8 +1059,8 @@
     } catch(e) { customStatuses = []; }
     try {
       const p = JSON.parse(localStorage.getItem('tsl_builtinStatuses'));
-      builtinStatuses = Array.isArray(p) ? p : STATUSES.slice();
-    } catch(e) { builtinStatuses = STATUSES.slice(); }
+      builtinStatuses = Array.isArray(p) ? p : DEFAULT_STATUSES.slice();
+    } catch(e) { builtinStatuses = DEFAULT_STATUSES.slice(); }
     try {
       const p = JSON.parse(localStorage.getItem('tsl_builtinLabels'));
       builtinLabels = (p && typeof p === 'object') ? p : {};
@@ -1434,6 +1434,8 @@
     const btn = e.target.closest('.btn-del-type');
     if (!btn) return;
     const id = btn.dataset.id;
+    /* Do not allow deleting the last status */
+    if (getEffectiveStatuses().length <= 1) return;
     if (btn.dataset.builtin) {
       builtinStatuses = builtinStatuses.filter(b => b !== id);
       delete builtinLabels[id];
