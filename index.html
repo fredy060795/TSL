@@ -1160,9 +1160,6 @@
       const li = document.createElement('li');
       if (isDefault) li.classList.add('type-default');
       li.innerHTML = `<span class="type-name">${escHtml(tType(ty))}</span>` +
-        (isDefault
-          ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`
-          : '') +
         `<button class="btn-edit-type" data-i="${i}" title="${escHtml(t('renameType'))}">✎</button>` +
         `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
