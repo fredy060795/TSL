@@ -208,6 +208,28 @@
       line-height: 1;
     }
     .type-list li .btn-del-type:hover { color: var(--red); }
+    .type-list li .btn-edit-status {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .type-list li .btn-edit-status:hover { color: var(--accent); }
+    .type-rename-input {
+      flex: 1;
+      background: #1e2e1e;
+      border: 1px solid var(--accent);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      outline: none;
+      min-width: 0;
+    }
 
     /* ── Unit status badges ── */
     .unit-status {
@@ -686,6 +708,7 @@
       sidebarStatuses:    'Statusarten',
       statusPlaceholder:  'Neuer Status\u2026',
       btnAddStatusTitle:  'Status hinzuf\u00fcgen',
+      renameStatus:       'Status umbenennen',
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
@@ -733,6 +756,7 @@
       sidebarStatuses:    'Status types',
       statusPlaceholder:  'New status\u2026',
       btnAddStatusTitle:  'Add status',
+      renameStatus:       'Rename status',
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
@@ -780,6 +804,7 @@
       sidebarStatuses:    'Typy stav\u016f',
       statusPlaceholder:  'Nov\u00fd stav\u2026',
       btnAddStatusTitle:  'P\u0159idat stav',
+      renameStatus:       'P\u0159ejmenovat stav',
     },
   };
 
@@ -827,7 +852,9 @@
   let log   = [];
   let unitStatuses   = {};   /* { unitName: 'active'|'base'|'kia'|'unknown'|'cs_...' } */
   let customStatuses = [];   /* [{ id: 'cs_...', label: string }] */
-  const STATUSES = ['active', 'base', 'kia', 'unknown'];
+  let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
+  let builtinLabels   = {};  /* { id: customLabel } – overrides i18n labels for built-in statuses */
+  const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
 
   /* Palette for custom status colours (cycles when more than 5 custom statuses exist) */
   const CUSTOM_PALETTE = [
@@ -854,6 +881,7 @@
 
   /* Display label for any status id */
   function getStatusLabel(id) {
+    if (builtinLabels[id]) return builtinLabels[id];
     const cs = customStatuses.find(s => s.id === id);
     if (cs) return cs.label;
     return t('status_' + id) || id;
@@ -861,7 +889,7 @@
 
   /* All active status ids (built-in + custom) */
   function getEffectiveStatuses() {
-    return STATUSES.concat(customStatuses.map(s => s.id));
+    return builtinStatuses.concat(customStatuses.map(s => s.id));
   }
 
   /* ── IndexedDB (primary persistent storage) ── */
@@ -901,12 +929,14 @@
       const db  = await openDB();
       const tx  = db.transaction(IDB_STORE, 'readwrite');
       const st  = tx.objectStore(IDB_STORE);
-      st.put(units,          'units');
-      st.put(types,          'types');
-      st.put(log,            'log');
-      st.put(unitStatuses,   'unitStatuses');
-      st.put(customStatuses, 'customStatuses');
-      st.put(Date.now(),     'lastSaved');
+      st.put(units,           'units');
+      st.put(types,           'types');
+      st.put(log,             'log');
+      st.put(unitStatuses,    'unitStatuses');
+      st.put(customStatuses,  'customStatuses');
+      st.put(builtinStatuses, 'builtinStatuses');
+      st.put(builtinLabels,   'builtinLabels');
+      st.put(Date.now(),      'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
         tx.onerror    = () => rej(tx.error);
@@ -925,15 +955,17 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, cs, ts] = await Promise.all([
+      const [u, t, l, us, cs, bs, bl, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
         idbGet(st, 'unitStatuses'),
         idbGet(st, 'customStatuses'),
+        idbGet(st, 'builtinStatuses'),
+        idbGet(st, 'builtinLabels'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -966,30 +998,40 @@
   function save() {
     /* Synchronous localStorage fallback – always written first */
     try {
-      localStorage.setItem('tsl_units',          JSON.stringify(units));
-      localStorage.setItem('tsl_types',          JSON.stringify(types));
-      localStorage.setItem('tsl_log',            JSON.stringify(log));
-      localStorage.setItem('tsl_unitStatuses',   JSON.stringify(unitStatuses));
-      localStorage.setItem('tsl_customStatuses', JSON.stringify(customStatuses));
-      localStorage.setItem('tsl_lang',           lang);
+      localStorage.setItem('tsl_units',           JSON.stringify(units));
+      localStorage.setItem('tsl_types',           JSON.stringify(types));
+      localStorage.setItem('tsl_log',             JSON.stringify(log));
+      localStorage.setItem('tsl_unitStatuses',    JSON.stringify(unitStatuses));
+      localStorage.setItem('tsl_customStatuses',  JSON.stringify(customStatuses));
+      localStorage.setItem('tsl_builtinStatuses', JSON.stringify(builtinStatuses));
+      localStorage.setItem('tsl_builtinLabels',   JSON.stringify(builtinLabels));
+      localStorage.setItem('tsl_lang',            lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
     saveToIDB();
   }
 
   function ensureUnitStatuses() {
-    units.forEach(u => { if (!unitStatuses[u]) unitStatuses[u] = 'active'; });
+    const effective = getEffectiveStatuses();
+    const fallback  = effective[0] || 'active';
+    units.forEach(u => {
+      if (!unitStatuses[u] || !effective.includes(unitStatuses[u])) {
+        unitStatuses[u] = fallback;
+      }
+    });
   }
 
   async function load() {
     /* 1. Try IndexedDB (primary) */
     const idb = await loadFromIDB();
     if (idb && idb.units !== undefined && idb.log !== undefined) {
-      units          = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
-      types          = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
-      log            = Array.isArray(idb.log)   ? idb.log   : [];
-      unitStatuses   = (idb.unitStatuses   && typeof idb.unitStatuses   === 'object') ? idb.unitStatuses   : {};
-      customStatuses = Array.isArray(idb.customStatuses) ? idb.customStatuses : [];
+      units           = Array.isArray(idb.units) ? idb.units : DEFAULT_UNITS.slice();
+      types           = Array.isArray(idb.types) ? idb.types : DEFAULT_TYPES.slice();
+      log             = Array.isArray(idb.log)   ? idb.log   : [];
+      unitStatuses    = (idb.unitStatuses   && typeof idb.unitStatuses   === 'object') ? idb.unitStatuses   : {};
+      customStatuses  = Array.isArray(idb.customStatuses) ? idb.customStatuses : [];
+      builtinStatuses = Array.isArray(idb.builtinStatuses) ? idb.builtinStatuses : DEFAULT_STATUSES.slice();
+      builtinLabels   = (idb.builtinLabels && typeof idb.builtinLabels === 'object') ? idb.builtinLabels : {};
       ensureUnitStatuses();
       if (idb.lastSaved) setSaveStatus(true);
       return;
@@ -1015,6 +1057,14 @@
       const p = JSON.parse(localStorage.getItem('tsl_customStatuses'));
       customStatuses = Array.isArray(p) ? p : [];
     } catch(e) { customStatuses = []; }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_builtinStatuses'));
+      builtinStatuses = Array.isArray(p) ? p : DEFAULT_STATUSES.slice();
+    } catch(e) { builtinStatuses = DEFAULT_STATUSES.slice(); }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_builtinLabels'));
+      builtinLabels = (p && typeof p === 'object') ? p : {};
+    } catch(e) { builtinLabels = {}; }
     ensureUnitStatuses();
     /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
@@ -1115,22 +1165,23 @@
   function renderStatuses() {
     const list = document.getElementById('statusList');
     list.innerHTML = '';
-    /* Built-in statuses – not deletable */
-    STATUSES.forEach(id => {
+    /* Built-in statuses – now editable and removable */
+    builtinStatuses.forEach(id => {
       const li = document.createElement('li');
-      li.classList.add('type-default');
       li.innerHTML =
         `<span class="type-name">${escHtml(getStatusLabel(id))}</span>` +
-        `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`;
+        `<button class="btn-edit-status" data-id="${escHtml(id)}" title="${escHtml(t('renameStatus'))}">✎</button>` +
+        `<button class="btn-del-type" data-id="${escHtml(id)}" data-builtin="1" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
     });
-    /* Custom statuses – deletable */
+    /* Custom statuses – editable and deletable */
     customStatuses.forEach((cs, i) => {
       const p  = CUSTOM_PALETTE[i % CUSTOM_PALETTE.length];
       const li = document.createElement('li');
       li.innerHTML =
         `<span class="status-list-swatch" style="background:${p.bg};border-color:${p.border};"></span>` +
         `<span class="type-name" style="color:${p.color};">${escHtml(cs.label)}</span>` +
+        `<button class="btn-edit-status" data-id="${escHtml(cs.id)}" title="${escHtml(t('renameStatus'))}">✎</button>` +
         `<button class="btn-del-type" data-id="${escHtml(cs.id)}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
     });
@@ -1239,7 +1290,7 @@
     if (!name) return;
     if (units.includes(name)) { input.select(); return; }
     units.push(name);
-    unitStatuses[name] = 'active';
+    unitStatuses[name] = getEffectiveStatuses()[0] || 'active';
     input.value = '';
     save(); renderUnits(); renderLagebild();
   }
@@ -1265,6 +1316,36 @@
     customStatuses.push({ id: 'cs_' + Date.now() + '_' + (++_csCounter), label });
     input.value = '';
     save(); renderStatuses();
+  }
+
+  /* ── Rename a status inline ── */
+  function startRenameStatus(id, li) {
+    const span = li.querySelector('.type-name');
+    if (!span || li.querySelector('.type-rename-input')) return; /* already editing */
+    const inp = document.createElement('input');
+    inp.type      = 'text';
+    inp.className = 'type-rename-input';
+    inp.value     = getStatusLabel(id);
+    inp.maxLength = 20;
+    span.replaceWith(inp);
+    inp.focus(); inp.select();
+    let cancelled = false;
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  { inp.blur(); }
+      else if (e.key === 'Escape') { cancelled = true; inp.blur(); }
+    });
+    inp.addEventListener('blur', () => {
+      if (cancelled) { renderStatuses(); return; }
+      const newLabel = inp.value.trim();
+      if (!newLabel) { renderStatuses(); return; }
+      if (builtinStatuses.includes(id)) {
+        builtinLabels[id] = newLabel;
+      } else {
+        const cs = customStatuses.find(s => s.id === id);
+        if (cs) cs.label = newLabel;
+      }
+      save(); renderStatuses(); renderUnits(); renderLagebild();
+    }, { once: true });
   }
 
   function addEntry() {
@@ -1346,13 +1427,26 @@
   document.getElementById('newStatusInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomStatus(); });
 
   document.getElementById('statusList').addEventListener('click', e => {
+    /* Rename button */
+    const editBtn = e.target.closest('.btn-edit-status');
+    if (editBtn) { startRenameStatus(editBtn.dataset.id, editBtn.closest('li')); return; }
+    /* Delete button */
     const btn = e.target.closest('.btn-del-type');
     if (!btn) return;
     const id = btn.dataset.id;
-    customStatuses = customStatuses.filter(s => s.id !== id);
-    /* Reset any unit that used the deleted status back to 'active' */
+    /* Do not allow deleting the last status */
+    if (getEffectiveStatuses().length <= 1) return;
+    if (btn.dataset.builtin) {
+      builtinStatuses = builtinStatuses.filter(b => b !== id);
+      delete builtinLabels[id];
+    } else {
+      customStatuses = customStatuses.filter(s => s.id !== id);
+    }
+    /* Reset units using the deleted status to the first remaining status */
+    const effective = getEffectiveStatuses();
+    const fallback  = effective[0] || 'active';
     Object.keys(unitStatuses).forEach(u => {
-      if (unitStatuses[u] === id) unitStatuses[u] = 'active';
+      if (unitStatuses[u] === id) unitStatuses[u] = fallback;
     });
     save(); renderStatuses(); renderUnits(); renderLagebild();
   });
