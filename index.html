@@ -98,6 +98,8 @@
       z-index: 9998;
       box-shadow: 0 4px 18px rgba(0,0,0,0.75);
       min-width: 260px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
       display: none;
     }
     .sprachtafel-panel.open { display: block; }
@@ -749,6 +751,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
+    <button class="sprachtafel-btn" id="btnNato" data-i18n-title="natoTitle" title="NATO Alphabet">&#127279; NATO</button>
     <div style="text-align:right;">
       <div class="clock" id="clock">00:00:00</div>
       <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
@@ -760,7 +763,11 @@
 <div class="sprachtafel-panel" id="sprachtafelPanel">
   <h3 data-i18n="sprachtafelTitle">Sprachtafel Funk</h3>
   <table class="sprachtafel-table" id="sprachtafelTable"></table>
-  <h4 data-i18n="natoTitle">NATO Alphabet</h4>
+</div>
+
+<!-- NATO Alphabet Panel -->
+<div class="sprachtafel-panel" id="natoPanel">
+  <h3 data-i18n="natoTitle">NATO Alphabet</h3>
   <table class="nato-table">
     <tr><td>A</td><td>ALPHA</td></tr>
     <tr><td>B</td><td>BRAVO</td></tr>
@@ -1464,10 +1471,27 @@
 
   document.getElementById('btnSprachtafel')?.addEventListener('click', function(e) {
     e.stopPropagation();
-    const panel = document.getElementById('sprachtafelPanel');
+    const panel     = document.getElementById('sprachtafelPanel');
+    const natoPanel = document.getElementById('natoPanel');
+    const natoBtn   = document.getElementById('btnNato');
+    /* Close NATO panel if open */
+    natoPanel.classList.remove('open');
+    if (natoBtn) natoBtn.classList.remove('active');
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
     if (isOpen) renderSprachtafel();
+  });
+
+  document.getElementById('btnNato')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const natoPanel  = document.getElementById('natoPanel');
+    const funkPanel  = document.getElementById('sprachtafelPanel');
+    const funkBtn    = document.getElementById('btnSprachtafel');
+    /* Close Funk panel if open */
+    funkPanel.classList.remove('open');
+    if (funkBtn) funkBtn.classList.remove('active');
+    const isOpen = natoPanel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
   });
 
   document.addEventListener('click', function(e) {
@@ -1478,6 +1502,14 @@
         e.target.id !== 'btnSprachtafel') {
       panel.classList.remove('open');
       if (btn) btn.classList.remove('active');
+    }
+    const natoPanel = document.getElementById('natoPanel');
+    const natoBtn   = document.getElementById('btnNato');
+    if (natoPanel && natoPanel.classList.contains('open') &&
+        !natoPanel.contains(e.target) &&
+        e.target.id !== 'btnNato') {
+      natoPanel.classList.remove('open');
+      if (natoBtn) natoBtn.classList.remove('active');
     }
   });
 
