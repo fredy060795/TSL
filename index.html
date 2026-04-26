@@ -241,6 +241,47 @@
     }
     .btn-color-status:hover,
     .btn-color-type:hover { opacity: 1; }
+    /* ── Status select menu popup ── */
+    .status-menu {
+      position: fixed;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 4px 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.7);
+      min-width: 100px;
+    }
+    .status-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: none;
+      background: none;
+      color: var(--text);
+      text-align: left;
+      white-space: nowrap;
+    }
+    .status-menu-item:hover { background: #252525; }
+    .status-menu-item.current { opacity: 0.5; cursor: default; }
+    .status-menu-item .menu-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+
     /* ── Status color picker popup ── */
     .status-color-picker {
       position: fixed;
@@ -791,6 +832,7 @@
       colorStatus:        'Farbe \u00e4ndern',
       colorCustom:        'Eigene Farbe',
       colorReset:         'Farbe zur\u00fccksetzen',
+      selectStatus:       'Status w\u00e4hlen',
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
@@ -844,6 +886,7 @@
       colorStatus:        'Change color',
       colorCustom:        'Custom color',
       colorReset:         'Reset color',
+      selectStatus:       'Select status',
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
@@ -897,6 +940,7 @@
       colorStatus:        'Zm\u011bnit barvu',
       colorCustom:        'Vlastn\u00ed barva',
       colorReset:         'Obnovit barvu',
+      selectStatus:       'Vybrat stav',
     },
   };
 
@@ -1267,7 +1311,7 @@
       const styleAttr   = inlineStyle ? ` style="${inlineStyle}"` : '';
       const classAttr   = inlineStyle ? 'unit-status' : `unit-status status-${status}`;
       li.innerHTML =
-        `<button class="${classAttr}"${styleAttr} data-unit="${escHtml(u)}" title="${escHtml(t('statusAutoLog').replace('{old}','').replace('{new}','…'))}">` +
+        `<button class="${classAttr}"${styleAttr} data-unit="${escHtml(u)}" title="${escHtml(t('selectStatus'))}">` +
           `${escHtml(getStatusLabel(status))}` +
         `</button>` +
         `<span class="unit-name">${escHtml(u)}</span>` +
@@ -1378,15 +1422,13 @@
     });
   }
 
-  /* ── Set unit status (cycles on click, auto-logs change) ── */
-  function setUnitStatus(unitName) {
-    const effective = getEffectiveStatuses();
-    const current   = unitStatuses[unitName] || 'active';
-    const idx       = effective.indexOf(current);
-    const next      = effective[(idx >= 0 ? idx + 1 : 0) % effective.length];
-    const oldLabel  = getStatusLabel(current);
-    const newLabel  = getStatusLabel(next);
-    unitStatuses[unitName] = next;
+  /* ── Set unit status directly (no cycling) ── */
+  function setUnitStatus(unitName, newStatus) {
+    const current  = unitStatuses[unitName] || 'active';
+    if (newStatus === current) return;
+    const oldLabel = getStatusLabel(current);
+    const newLabel = getStatusLabel(newStatus);
+    unitStatuses[unitName] = newStatus;
     /* Auto-log the status change */
     log.push({
       zeit:   nowTime(),
@@ -1399,6 +1441,63 @@
     renderUnits();
     renderLagebild();
     renderLog();
+  }
+
+  /* ── Open status selection menu ── */
+  function openStatusMenu(unitName, anchorEl) {
+    /* Close any existing menu */
+    const existing = document.getElementById('statusSelectMenu');
+    if (existing) {
+      existing.remove();
+      if (existing.dataset.unit === unitName) return;
+    }
+
+    const effective = getEffectiveStatuses();
+    const current   = unitStatuses[unitName] || effective[0];
+
+    const menu = document.createElement('div');
+    menu.id           = 'statusSelectMenu';
+    menu.className    = 'status-menu';
+    menu.dataset.unit = unitName;
+
+    effective.forEach(id => {
+      const p = (builtinColors[id] || BUILTIN_DEFAULT_COLORS[id]) ||
+                getCustomStyle(id) ||
+                { bg: '#2a2a2a', color: '#888', border: '#444' };
+      const btn = document.createElement('button');
+      btn.className = 'status-menu-item' + (id === current ? ' current' : '');
+      btn.innerHTML =
+        `<span class="menu-swatch" style="background:${p.bg};border-color:${p.border};"></span>` +
+        `<span style="color:${p.color};">${escHtml(getStatusLabel(id))}</span>`;
+      if (id !== current) {
+        btn.addEventListener('click', () => {
+          menu.remove();
+          document.removeEventListener('click', onOutside, true);
+          setUnitStatus(unitName, id);
+        });
+      }
+      menu.appendChild(btn);
+    });
+
+    document.body.appendChild(menu);
+    const rect = anchorEl.getBoundingClientRect();
+    let top  = rect.bottom + 4;
+    let left = rect.left;
+    const mw = menu.offsetWidth;
+    const mh = menu.offsetHeight;
+    if (left + mw > window.innerWidth - 4)  left = window.innerWidth - mw - 4;
+    if (left < 4)                            left = 4;
+    if (top  + mh > window.innerHeight - 4) top  = rect.top - mh - 4;
+    menu.style.top  = top  + 'px';
+    menu.style.left = left + 'px';
+
+    function onOutside(e) {
+      if (!menu.contains(e.target) && e.target !== anchorEl) {
+        menu.remove();
+        document.removeEventListener('click', onOutside, true);
+      }
+    }
+    setTimeout(() => document.addEventListener('click', onOutside, true), 0);
   }
 
   /* ── Render log ── */
@@ -1414,7 +1513,7 @@
     return map[art] || 'badge-sonstiges';
   }
 
-  function renderLog() {
+  function renderLog(scrollToBottom = false) {
     const tbody = document.getElementById('logBody');
     const count = document.getElementById('logCount');
     count.textContent = log.length + (log.length === 1 ? t('entry1') : t('entryN'));
@@ -1439,8 +1538,10 @@
       `;
       tbody.appendChild(tr);
     });
-    const wrap = document.querySelector('.table-wrap');
-    wrap.scrollTop = wrap.scrollHeight;
+    if (scrollToBottom) {
+      const wrap = document.querySelector('.table-wrap');
+      wrap.scrollTop = wrap.scrollHeight;
+    }
   }
 
   /* ── HTML escape ── */
@@ -1739,7 +1840,7 @@
     }
 
     log.push({ zeit, von, an, art, inhalt });
-    save(); renderLog();
+    save(); renderLog(true);
 
     // reset form – time resumes auto-tracking
     resetZeitAuto();
@@ -1776,9 +1877,9 @@
   document.getElementById('newUnitInput').addEventListener('keydown', e => { if (e.key === 'Enter') addUnit(); });
 
   document.getElementById('unitList').addEventListener('click', e => {
-    /* Status badge click – cycle status */
+    /* Status badge click – open status selection menu */
     const statusBtn = e.target.closest('.unit-status');
-    if (statusBtn) { setUnitStatus(statusBtn.dataset.unit); return; }
+    if (statusBtn) { openStatusMenu(statusBtn.dataset.unit, statusBtn); return; }
     /* Delete button */
     const delBtn = e.target.closest('.btn-del-unit');
     if (!delBtn) return;
@@ -1843,7 +1944,7 @@
   document.getElementById('lagebild').addEventListener('click', e => {
     const chip = e.target.closest('.lagebild-chip');
     if (!chip) return;
-    setUnitStatus(chip.dataset.unit);
+    openStatusMenu(chip.dataset.unit, chip);
   });
 
   document.getElementById('btnLog').addEventListener('click', addEntry);
