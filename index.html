@@ -8,19 +8,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #1a1c1a;
-      --panel:    #23271f;
-      --border:   #3a4030;
-      --accent:   #6a8a3a;
-      --accent2:  #4e6a28;
-      --text:     #d4d8c8;
-      --text-dim: #7a8468;
-      --red:      #c0392b;
+      --bg:       #121212;
+      --panel:    #1a1a1a;
+      --border:   #282828;
+      --accent:   #2ecc71;
+      --accent2:  #27ae60;
+      --text:     #d0d0d0;
+      --text-dim: #888888;
+      --red:      #e74c3c;
       --blue:     #2e6da4;
       --orange:   #c0721a;
-      --green:    #4a7a2a;
-      --row-even: #1e221a;
-      --row-odd:  #23271f;
+      --green:    #2ecc71;
+      --row-even: #0f0f0f;
+      --row-odd:  #1a1a1a;
     }
 
     body {
@@ -67,7 +67,7 @@
       text-align: right;
       margin-top: 2px;
     }
-    .save-status.ok  { color: #4a9a4a; }
+    .save-status.ok  { color: #2ecc71; }
     .save-status.err { color: var(--red); }
 
     /* ── Language switcher ── */
@@ -90,7 +90,7 @@
       text-transform: uppercase;
     }
     .btn-lang:hover { border-color: var(--accent); color: var(--text); }
-    .btn-lang.active { border-color: var(--accent); color: var(--accent); background: #1e2a10; }
+    .btn-lang.active { border-color: var(--accent); color: var(--accent); background: #0a2a14; }
 
     /* ── Layout ── */
     .layout {
@@ -134,7 +134,7 @@
       user-select: none;
       transition: background 0.1s;
     }
-    .unit-list li:hover { background: #2d3228; }
+    .unit-list li:hover { background: #252525; }
     .unit-list li .unit-name { flex: 1; }
     .unit-list li .btn-del-unit {
       background: none;
@@ -195,7 +195,7 @@
       user-select: none;
       transition: background 0.1s;
     }
-    .type-list li:hover { background: #2d3228; }
+    .type-list li:hover { background: #252525; }
     .type-list li .type-name { flex: 1; font-size: 12px; }
     .type-list li.type-default .type-name { color: var(--text-dim); font-style: italic; }
     .type-list li .btn-del-type {
@@ -225,7 +225,7 @@
       white-space: nowrap;
     }
     .unit-status:hover { opacity: 0.75; }
-    .status-active  { background: #1a3a1a; color: #7ad07a; border-color: #3a6a3a; }
+    .status-active  { background: #0a2a0a; color: #2ecc71; border-color: #27ae60; }
     .status-base    { background: #1a2a4a; color: #7ab4e8; border-color: #2a4a7a; }
     .status-kia     { background: #4a1a1a; color: #e87a7a; border-color: #7a2a2a; }
     .status-unknown { background: #2a2a2a; color: #909090; border-color: #444444; }
@@ -276,7 +276,7 @@
     .lagebild-chip:hover { opacity: 0.8; }
     .lagebild-chip .chip-name   { font-weight: bold; }
     .lagebild-chip .chip-status { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
-    .chip-active  { background: #1a3a1a; border-color: #3a6a3a; color: #7ad07a; }
+    .chip-active  { background: #0a2a0a; border-color: #27ae60; color: #2ecc71; }
     .chip-base    { background: #1a2a4a; border-color: #2a4a7a; color: #7ab4e8; }
     .chip-kia     { background: #4a1a1a; border-color: #7a2a2a; color: #e87a7a; }
     .chip-kia .chip-name { text-decoration: line-through; opacity: 0.6; }
@@ -433,7 +433,7 @@
       border-collapse: collapse;
     }
     thead th {
-      background: #1e2218;
+      background: #111111;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -448,11 +448,11 @@
     }
     tbody tr:nth-child(even)  { background: var(--row-even); }
     tbody tr:nth-child(odd)   { background: var(--row-odd); }
-    tbody tr:hover { background: #2a2f22; }
+    tbody tr:hover { background: #252525; }
 
     tbody td {
       padding: 5px 10px;
-      border-bottom: 1px solid #252820;
+      border-bottom: 1px solid #1e1e1e;
       vertical-align: middle;
     }
     .td-nr    { width: 42px; color: var(--text-dim); text-align: center; }
@@ -473,7 +473,7 @@
       font-weight: bold;
     }
     .badge-anforderung { background: #1e3a5a; color: #7ab4e8; }
-    .badge-truppen     { background: #1a3a1a; color: #7ad07a; }
+    .badge-truppen     { background: #0a2a0a; color: #2ecc71; }
     .badge-feind       { background: #4a1a1a; color: #e87a7a; }
     .badge-meldung     { background: #3a3010; color: #d4b868; }
     .badge-sonstiges   { background: #2a2a2a; color: #aaaaaa; }
