@@ -1399,7 +1399,7 @@
     ).join('');
   }
 
-  document.getElementById('btnSprachtafel').addEventListener('click', function(e) {
+  document.getElementById('btnSprachtafel')?.addEventListener('click', function(e) {
     e.stopPropagation();
     const panel = document.getElementById('sprachtafelPanel');
     const isOpen = panel.classList.toggle('open');
@@ -1409,11 +1409,12 @@
 
   document.addEventListener('click', function(e) {
     const panel = document.getElementById('sprachtafelPanel');
-    if (panel.classList.contains('open') &&
+    const btn   = document.getElementById('btnSprachtafel');
+    if (panel && panel.classList.contains('open') &&
         !panel.contains(e.target) &&
         e.target.id !== 'btnSprachtafel') {
       panel.classList.remove('open');
-      document.getElementById('btnSprachtafel').classList.remove('active');
+      if (btn) btn.classList.remove('active');
     }
   });
 
