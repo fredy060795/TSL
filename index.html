@@ -228,7 +228,8 @@
       line-height: 1;
     }
     .type-list li .btn-edit-status:hover { color: var(--accent); }
-    .btn-color-status {
+    .btn-color-status,
+    .btn-color-type {
       background: none;
       border: none;
       padding: 0 2px;
@@ -238,7 +239,8 @@
       opacity: 0.6;
       flex-shrink: 0;
     }
-    .btn-color-status:hover { opacity: 1; }
+    .btn-color-status:hover,
+    .btn-color-type:hover { opacity: 1; }
     /* ── Status color picker popup ── */
     .status-color-picker {
       position: fixed;
@@ -767,6 +769,7 @@
       entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
       remove:          'Entfernen',  typeDefault: 'Standard',
       renameType:         'Ereignisart umbenennen',
+      colorType:          'Farbe \u00e4ndern',
       delRow:          'Eintrag l\u00f6schen',
       zeitManual:      'Manuelle Zeit \u2013 \u21ba Reset zum Zur\u00fccksetzen',
       confirmDel:      'Eintrag #{n} l\u00f6schen?',
@@ -819,6 +822,7 @@
       entry1:          ' entry',     entryN: ' entries',
       remove:          'Remove',     typeDefault: 'Default',
       renameType:         'Rename event type',
+      colorType:          'Change color',
       delRow:          'Delete entry',
       zeitManual:      'Manual time \u2013 \u21ba Reset to restore',
       confirmDel:      'Delete entry #{n}?',
@@ -871,6 +875,7 @@
       entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
       remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
       renameType:         'P\u0159ejmenovat typ ud\u00e1losti',
+      colorType:          'Zm\u011bnit barvu',
       delRow:          'Smazat z\u00e1znam',
       zeitManual:      'Ru\u010dn\u00ed \u010das \u2013 \u21ba Reset pro obnoven\u00ed',
       confirmDel:      'Smazat z\u00e1znam #{n}?',
@@ -942,6 +947,7 @@
   let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
   let builtinLabels   = {};  /* { id: customLabel } – overrides i18n labels for built-in statuses */
   let builtinColors   = {};  /* { id: {bg,color,border} } – overrides default colors for built-in statuses */
+  let typeColors      = {};  /* { typeName: {bg,color,border} } – custom colors for event types */
   const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
 
   /* Default colours for the four built-in statuses */
@@ -951,6 +957,16 @@
     kia:     { bg: '#4a1a1a', color: '#e87a7a', border: '#7a2a2a' },
     unknown: { bg: '#2a2a2a', color: '#909090', border: '#444444' },
   };
+
+  /* Default colours for the five built-in event types (match existing badge CSS) */
+  const BUILTIN_TYPE_COLORS = {
+    'Anforderung':    { bg: '#1e3a5a', color: '#7ab4e8', border: '#2a5a8a' },
+    'Truppenmeldung': { bg: '#0a2a0a', color: '#2ecc71', border: '#1a4a1a' },
+    'Feindmeldung':   { bg: '#4a1a1a', color: '#e87a7a', border: '#7a2a2a' },
+    'Meldung':        { bg: '#3a3010', color: '#d4b868', border: '#6a5a20' },
+    'Sonstiges':      { bg: '#2a2a2a', color: '#aaaaaa', border: '#444444' },
+  };
+  const DEFAULT_TYPE_COLOR = { bg: '#2a2a2a', color: '#aaaaaa', border: '#444444' };
 
   /* Palette for custom status colours (cycles when more than 5 custom statuses exist) */
   const CUSTOM_PALETTE = [
@@ -1060,6 +1076,7 @@
       st.put(builtinStatuses, 'builtinStatuses');
       st.put(builtinLabels,   'builtinLabels');
       st.put(builtinColors,   'builtinColors');
+      st.put(typeColors,      'typeColors');
       st.put(Date.now(),      'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
@@ -1079,7 +1096,7 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, cs, bs, bl, bc, ts] = await Promise.all([
+      const [u, t, l, us, cs, bs, bl, bc, tc, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
@@ -1088,9 +1105,10 @@
         idbGet(st, 'builtinStatuses'),
         idbGet(st, 'builtinLabels'),
         idbGet(st, 'builtinColors'),
+        idbGet(st, 'typeColors'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -1131,6 +1149,7 @@
       localStorage.setItem('tsl_builtinStatuses', JSON.stringify(builtinStatuses));
       localStorage.setItem('tsl_builtinLabels',   JSON.stringify(builtinLabels));
       localStorage.setItem('tsl_builtinColors',   JSON.stringify(builtinColors));
+      localStorage.setItem('tsl_typeColors',      JSON.stringify(typeColors));
       localStorage.setItem('tsl_lang',            lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Async IndexedDB primary storage */
@@ -1159,6 +1178,7 @@
       builtinStatuses = Array.isArray(idb.builtinStatuses) ? idb.builtinStatuses : DEFAULT_STATUSES.slice();
       builtinLabels   = (idb.builtinLabels && typeof idb.builtinLabels === 'object') ? idb.builtinLabels : {};
       builtinColors   = (idb.builtinColors && typeof idb.builtinColors === 'object') ? idb.builtinColors : {};
+      typeColors      = (idb.typeColors   && typeof idb.typeColors   === 'object') ? idb.typeColors   : {};
       ensureUnitStatuses();
       if (idb.lastSaved) setSaveStatus(true);
       return;
@@ -1196,6 +1216,10 @@
       const p = JSON.parse(localStorage.getItem('tsl_builtinColors'));
       builtinColors = (p && typeof p === 'object') ? p : {};
     } catch(e) { builtinColors = {}; }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_typeColors'));
+      typeColors = (p && typeof p === 'object') ? p : {};
+    } catch(e) { typeColors = {}; }
     ensureUnitStatuses();
     /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
@@ -1277,7 +1301,11 @@
       const isDefault = DEFAULT_TYPES.includes(ty);
       const li = document.createElement('li');
       if (isDefault) li.classList.add('type-default');
-      li.innerHTML = `<span class="type-name">${escHtml(tType(ty))}</span>` +
+      const p = typeColors[ty] || BUILTIN_TYPE_COLORS[ty] || DEFAULT_TYPE_COLOR;
+      li.innerHTML =
+        `<span class="status-list-swatch" style="background:${p.bg};border-color:${p.border};"></span>` +
+        `<span class="type-name" style="color:${p.color};">${escHtml(tType(ty))}</span>` +
+        `<button class="btn-color-type" data-i="${i}" title="${escHtml(t('colorType'))}">&#9679;</button>` +
         `<button class="btn-edit-type" data-i="${i}" title="${escHtml(t('renameType'))}">✎</button>` +
         `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
@@ -1398,12 +1426,14 @@
     tbody.innerHTML = '';
     log.forEach((e, i) => {
       const tr = document.createElement('tr');
+      const tp = typeColors[e.art] || BUILTIN_TYPE_COLORS[e.art] || null;
+      const badgeStyle = tp ? ` style="background:${tp.bg};color:${tp.color};"` : '';
       tr.innerHTML = `
         <td class="td-nr">${i + 1}</td>
         <td class="td-zeit">${escHtml(e.zeit)}</td>
         <td class="td-von">${escHtml(e.von)}</td>
         <td class="td-an">${escHtml(e.an)}</td>
-        <td class="td-art"><span class="badge ${badgeClass(e.art)}">${escHtml(e.art)}</span></td>
+        <td class="td-art"><span class="badge ${badgeClass(e.art)}"${badgeStyle}>${escHtml(e.art)}</span></td>
         <td class="td-inhalt">${escHtml(e.inhalt)}</td>
         <td class="td-del"><button class="btn-del-row" data-i="${i}" title="${escHtml(t('delRow'))}">✕</button></td>
       `;
@@ -1583,6 +1613,85 @@
     save(); renderStatuses(); renderUnits(); renderLagebild();
   }
 
+  /* ── Colour picker for event types ── */
+  function openTypeColorPicker(typeName, anchorEl) {
+    const existing = document.getElementById('typeColorPicker');
+    if (existing) {
+      existing.remove();
+      if (existing.dataset.name === typeName) return;
+    }
+
+    const currentStyle = typeColors[typeName] || null;
+    const currentColor = currentStyle ? currentStyle.color : null;
+
+    const picker = document.createElement('div');
+    picker.id          = 'typeColorPicker';
+    picker.className   = 'status-color-picker';
+    picker.dataset.name = typeName;
+
+    const swatchRow = document.createElement('div');
+    swatchRow.className = 'picker-swatches';
+    COLOR_PRESETS.forEach(hex => {
+      const sw    = document.createElement('button');
+      sw.className = 'picker-swatch' + (hex === currentColor ? ' selected' : '');
+      sw.style.background = hex;
+      sw.title = hex;
+      sw.addEventListener('click', () => { applyTypeColor(typeName, hex); picker.remove(); });
+      swatchRow.appendChild(sw);
+    });
+    picker.appendChild(swatchRow);
+
+    const customRow   = document.createElement('div');
+    customRow.className = 'picker-custom-row';
+    const colorInput  = document.createElement('input');
+    colorInput.type   = 'color';
+    colorInput.value  = currentColor || '#2ecc71';
+    colorInput.addEventListener('change', () => { applyTypeColor(typeName, colorInput.value); picker.remove(); });
+    const customLabel = document.createElement('span');
+    customLabel.textContent = t('colorCustom');
+    customRow.appendChild(colorInput);
+    customRow.appendChild(customLabel);
+    picker.appendChild(customRow);
+
+    if (currentColor) {
+      const resetBtn = document.createElement('button');
+      resetBtn.className   = 'picker-reset';
+      resetBtn.textContent = t('colorReset');
+      resetBtn.addEventListener('click', () => { resetTypeColor(typeName); picker.remove(); });
+      picker.appendChild(resetBtn);
+    }
+
+    document.body.appendChild(picker);
+    const rect = anchorEl.getBoundingClientRect();
+    let top  = rect.bottom + 4;
+    let left = rect.left;
+    const pw = picker.offsetWidth;
+    const ph = picker.offsetHeight;
+    if (left + pw > window.innerWidth - 4)  left = window.innerWidth - pw - 4;
+    if (left < 4)                            left = 4;
+    if (top  + ph > window.innerHeight - 4) top  = rect.top - ph - 4;
+    picker.style.top  = top  + 'px';
+    picker.style.left = left + 'px';
+
+    function onOutside(e) {
+      if (!picker.contains(e.target) && e.target !== anchorEl) {
+        picker.remove();
+        document.removeEventListener('click', onOutside, true);
+      }
+    }
+    setTimeout(() => document.addEventListener('click', onOutside, true), 0);
+  }
+
+  function applyTypeColor(typeName, hex) {
+    typeColors[typeName] = deriveStatusStyle(hex);
+    save(); renderTypes(); renderLog();
+  }
+
+  function resetTypeColor(typeName) {
+    delete typeColors[typeName];
+    save(); renderTypes(); renderLog();
+  }
+
   /* ── Rename a type inline ── */
   function startRenameType(i, li) {
     const span = li.querySelector('.type-name');
@@ -1609,6 +1718,7 @@
         inp.focus(); inp.select(); return;
       }
       log.forEach(e => { if (e.art === oldName) e.art = newName; });
+      if (typeColors[oldName]) { typeColors[newName] = typeColors[oldName]; delete typeColors[oldName]; }
       types[i] = newName;
       save(); renderTypes(); renderLog();
     }
@@ -1683,6 +1793,9 @@
   document.getElementById('newTypeInput').addEventListener('keydown', e => { if (e.key === 'Enter') addType(); });
 
   document.getElementById('typeList').addEventListener('click', e => {
+    /* Colour button */
+    const colorBtn = e.target.closest('.btn-color-type');
+    if (colorBtn) { openTypeColorPicker(types[parseInt(colorBtn.dataset.i, 10)], colorBtn); return; }
     /* Rename button */
     const editBtn = e.target.closest('.btn-edit-type');
     if (editBtn) { startRenameType(parseInt(editBtn.dataset.i, 10), editBtn.closest('li')); return; }
@@ -1690,7 +1803,8 @@
     const btn = e.target.closest('.btn-del-type');
     if (!btn) return;
     const i = parseInt(btn.dataset.i, 10);
-    types.splice(i, 1);
+    const deleted = types.splice(i, 1)[0];
+    delete typeColors[deleted];
     save(); renderTypes();
   });
 
