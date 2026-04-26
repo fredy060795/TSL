@@ -70,6 +70,99 @@
     .save-status.ok  { color: #2ecc71; }
     .save-status.err { color: var(--red); }
 
+    /* ── Sprachtafel (radio communication table) ── */
+    .sprachtafel-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 8px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .sprachtafel-btn:hover { border-color: var(--accent); color: var(--text); }
+    .sprachtafel-btn.active { border-color: var(--accent); color: var(--accent); background: #0a2a14; }
+
+    .sprachtafel-panel {
+      position: fixed;
+      top: 54px;
+      right: 16px;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 10px 14px;
+      z-index: 9998;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.75);
+      min-width: 260px;
+      display: none;
+    }
+    .sprachtafel-panel.open { display: block; }
+    .sprachtafel-panel h3 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+    .sprachtafel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .sprachtafel-table tr:nth-child(even) td { background: var(--row-even); }
+    .sprachtafel-table tr:nth-child(odd)  td { background: var(--row-odd); }
+    .sprachtafel-table td {
+      padding: 4px 8px;
+      vertical-align: middle;
+    }
+    .sprachtafel-table td:first-child {
+      color: var(--text-dim);
+      width: 50%;
+      border-right: 1px solid var(--border);
+    }
+    .sprachtafel-table td:last-child {
+      color: var(--accent);
+      font-weight: bold;
+      padding-left: 12px;
+    }
+    .sprachtafel-panel h4 {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 10px 0 6px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+    .nato-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .nato-table td {
+      padding: 3px 8px;
+      vertical-align: middle;
+    }
+    .nato-table tr:nth-child(even) td { background: var(--row-even); }
+    .nato-table tr:nth-child(odd)  td { background: var(--row-odd); }
+    .nato-table td:first-child {
+      color: var(--text-dim);
+      width: 30%;
+      border-right: 1px solid var(--border);
+      font-weight: bold;
+    }
+    .nato-table td:last-child {
+      color: var(--accent);
+      font-weight: bold;
+      padding-left: 12px;
+    }
+
     /* ── Language switcher ── */
     .lang-switch {
       display: flex;
@@ -654,11 +747,49 @@
     <button class="btn-lang" data-lang="en">EN</button>
     <button class="btn-lang" data-lang="cz">CZ</button>
   </div>
-  <div style="text-align:right;">
-    <div class="clock" id="clock">00:00:00</div>
-    <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
+    <div style="text-align:right;">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
+    </div>
   </div>
 </header>
+
+<!-- Sprachtafel Panel -->
+<div class="sprachtafel-panel" id="sprachtafelPanel">
+  <h3 data-i18n="sprachtafelTitle">Sprachtafel Funk</h3>
+  <table class="sprachtafel-table" id="sprachtafelTable"></table>
+  <h4 data-i18n="natoTitle">NATO Alphabet</h4>
+  <table class="nato-table">
+    <tr><td>A</td><td>ALPHA</td></tr>
+    <tr><td>B</td><td>BRAVO</td></tr>
+    <tr><td>C</td><td>CHARLIE</td></tr>
+    <tr><td>D</td><td>DELTA</td></tr>
+    <tr><td>E</td><td>ECHO</td></tr>
+    <tr><td>F</td><td>FOXTROT</td></tr>
+    <tr><td>G</td><td>GOLF</td></tr>
+    <tr><td>H</td><td>HOTEL</td></tr>
+    <tr><td>I</td><td>INDIA</td></tr>
+    <tr><td>J</td><td>JULIETT</td></tr>
+    <tr><td>K</td><td>KILO</td></tr>
+    <tr><td>L</td><td>LIMA</td></tr>
+    <tr><td>M</td><td>MIKE</td></tr>
+    <tr><td>N</td><td>NOVEMBER</td></tr>
+    <tr><td>O</td><td>OSCAR</td></tr>
+    <tr><td>P</td><td>PAPA</td></tr>
+    <tr><td>Q</td><td>QUEBEC</td></tr>
+    <tr><td>R</td><td>ROMEO</td></tr>
+    <tr><td>S</td><td>SIERRA</td></tr>
+    <tr><td>T</td><td>TANGO</td></tr>
+    <tr><td>U</td><td>UNIFORM</td></tr>
+    <tr><td>V</td><td>VICTOR</td></tr>
+    <tr><td>W</td><td>WHISKEY</td></tr>
+    <tr><td>X</td><td>XRAY</td></tr>
+    <tr><td>Y</td><td>YANKEE</td></tr>
+    <tr><td>Z</td><td>ZULU</td></tr>
+  </table>
+</div>
 
 <div class="layout">
 
@@ -830,6 +961,21 @@
       colorCustom:        'Eigene Farbe',
       colorReset:         'Farbe zur\u00fccksetzen',
       selectStatus:       'Status w\u00e4hlen',
+      sprachtafelTitle:   'Sprachtafel Funk',
+      natoTitle:          'NATO Alphabet',
+      sprachtafel: [
+        ['Kommen',        'Over'],
+        ['Ende',          'Out'],
+        ['Verstanden',    'Copy'],
+        ['Wiederholen',   'Say Again'],
+        ['Warte',         'Wait'],
+        ['Empfang',       'Radio Check'],
+        ['Bejahend',      'Affirmative'],
+        ['Verneinend',    'Negative'],
+        ['Buchstabieren', 'Spell'],
+        ['Lauter',        'Speak Louder'],
+        ['Leiser',        'Speak Quieter'],
+      ],
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
@@ -883,6 +1029,21 @@
       colorCustom:        'Custom color',
       colorReset:         'Reset color',
       selectStatus:       'Select status',
+      sprachtafelTitle:   'Radio Communication Table',
+      natoTitle:          'NATO Alphabet',
+      sprachtafel: [
+        ['Kommen',        'Over'],
+        ['Ende',          'Out'],
+        ['Verstanden',    'Copy'],
+        ['Wiederholen',   'Say Again'],
+        ['Warte',         'Wait'],
+        ['Empfang',       'Radio Check'],
+        ['Bejahend',      'Affirmative'],
+        ['Verneinend',    'Negative'],
+        ['Buchstabieren', 'Spell'],
+        ['Lauter',        'Speak Louder'],
+        ['Leiser',        'Speak Quieter'],
+      ],
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
@@ -936,6 +1097,21 @@
       colorCustom:        'Vlastn\u00ed barva',
       colorReset:         'Obnovit barvu',
       selectStatus:       'Vybrat stav',
+      sprachtafelTitle:   'Tabulka Spojen\u00ed',
+      natoTitle:          'Abeceda NATO',
+      sprachtafel: [
+        ['Kommen',        'P\u0159ij\u00edjám'],
+        ['Ende',          'Konec'],
+        ['Verstanden',    'Rozum\u00edm'],
+        ['Wiederholen',   'Zopakujte'],
+        ['Warte',         '\u010cekejte'],
+        ['Empfang',       'Kontrola p\u0159\u00edjmu'],
+        ['Bejahend',      'Kladn\u011b'],
+        ['Verneinend',    'Z\u00e1porn\u011b'],
+        ['Buchstabieren', 'H\u00e1skujte'],
+        ['Lauter',        'Mluv\u011bte hlasit\u011bji'],
+        ['Leiser',        'Mluv\u011bte tišeji'],
+      ],
     },
   };
 
@@ -975,6 +1151,7 @@
     renderStatuses();
     renderLagebild();
     renderLog();
+    renderSprachtafel();
     /* Re-apply save status in new language */
     setSaveStatus(lastSaveOk);
   }
@@ -1274,6 +1451,35 @@
   }
   setInterval(tickClock, 1000);
   tickClock();
+
+  /* ── Sprachtafel (Radio Communication Table) ── */
+  function renderSprachtafel() {
+    const tbl = document.getElementById('sprachtafelTable');
+    if (!tbl) return;
+    const rows = t('sprachtafel') || LANGS.de.sprachtafel;
+    tbl.innerHTML = rows.map(([de, funk]) =>
+      `<tr><td>${de}</td><td>${funk}</td></tr>`
+    ).join('');
+  }
+
+  document.getElementById('btnSprachtafel')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const panel = document.getElementById('sprachtafelPanel');
+    const isOpen = panel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
+    if (isOpen) renderSprachtafel();
+  });
+
+  document.addEventListener('click', function(e) {
+    const panel = document.getElementById('sprachtafelPanel');
+    const btn   = document.getElementById('btnSprachtafel');
+    if (panel && panel.classList.contains('open') &&
+        !panel.contains(e.target) &&
+        e.target.id !== 'btnSprachtafel') {
+      panel.classList.remove('open');
+      if (btn) btn.classList.remove('active');
+    }
+  });
 
   /* ── Render units ── */
   function renderUnits() {
