@@ -131,6 +131,37 @@
       font-weight: bold;
       padding-left: 12px;
     }
+    .sprachtafel-panel h4 {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 10px 0 6px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+    .nato-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .nato-table td {
+      padding: 3px 8px;
+      vertical-align: middle;
+    }
+    .nato-table tr:nth-child(even) td { background: var(--row-even); }
+    .nato-table tr:nth-child(odd)  td { background: var(--row-odd); }
+    .nato-table td:first-child {
+      color: var(--text-dim);
+      width: 30%;
+      border-right: 1px solid var(--border);
+      font-weight: bold;
+    }
+    .nato-table td:last-child {
+      color: var(--accent);
+      font-weight: bold;
+      padding-left: 12px;
+    }
 
     /* ── Language switcher ── */
     .lang-switch {
@@ -729,6 +760,35 @@
 <div class="sprachtafel-panel" id="sprachtafelPanel">
   <h3 data-i18n="sprachtafelTitle">Sprachtafel Funk</h3>
   <table class="sprachtafel-table" id="sprachtafelTable"></table>
+  <h4 data-i18n="natoTitle">NATO Alphabet</h4>
+  <table class="nato-table">
+    <tr><td>A</td><td>ALPHA</td></tr>
+    <tr><td>B</td><td>BRAVO</td></tr>
+    <tr><td>C</td><td>CHARLIE</td></tr>
+    <tr><td>D</td><td>DELTA</td></tr>
+    <tr><td>E</td><td>ECHO</td></tr>
+    <tr><td>F</td><td>FOXTROT</td></tr>
+    <tr><td>G</td><td>GOLF</td></tr>
+    <tr><td>H</td><td>HOTEL</td></tr>
+    <tr><td>I</td><td>INDIA</td></tr>
+    <tr><td>J</td><td>JULIETT</td></tr>
+    <tr><td>K</td><td>KILO</td></tr>
+    <tr><td>L</td><td>LIMA</td></tr>
+    <tr><td>M</td><td>MIKE</td></tr>
+    <tr><td>N</td><td>NOVEMBER</td></tr>
+    <tr><td>O</td><td>OSCAR</td></tr>
+    <tr><td>P</td><td>PAPA</td></tr>
+    <tr><td>Q</td><td>QUEBEC</td></tr>
+    <tr><td>R</td><td>ROMEO</td></tr>
+    <tr><td>S</td><td>SIERRA</td></tr>
+    <tr><td>T</td><td>TANGO</td></tr>
+    <tr><td>U</td><td>UNIFORM</td></tr>
+    <tr><td>V</td><td>VICTOR</td></tr>
+    <tr><td>W</td><td>WHISKEY</td></tr>
+    <tr><td>X</td><td>XRAY</td></tr>
+    <tr><td>Y</td><td>YANKEE</td></tr>
+    <tr><td>Z</td><td>ZULU</td></tr>
+  </table>
 </div>
 
 <div class="layout">
@@ -902,6 +962,7 @@
       colorReset:         'Farbe zur\u00fccksetzen',
       selectStatus:       'Status w\u00e4hlen',
       sprachtafelTitle:   'Sprachtafel Funk',
+      natoTitle:          'NATO Alphabet',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -969,6 +1030,7 @@
       colorReset:         'Reset color',
       selectStatus:       'Select status',
       sprachtafelTitle:   'Radio Communication Table',
+      natoTitle:          'NATO Alphabet',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1036,6 +1098,7 @@
       colorReset:         'Obnovit barvu',
       selectStatus:       'Vybrat stav',
       sprachtafelTitle:   'Tabulka Spojen\u00ed',
+      natoTitle:          'Abeceda NATO',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
         ['Ende',          'Konec'],
