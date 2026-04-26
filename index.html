@@ -691,6 +691,7 @@
       saveErr:         '\u26a0 Speichern fehlgeschlagen \u2013 Fallback aktiv',
       entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
       remove:          'Entfernen',  typeDefault: 'Standard',
+      renameType:         'Ereignisart umbenennen',
       delRow:          'Eintrag l\u00f6schen',
       zeitManual:      'Manuelle Zeit \u2013 \u21ba Reset zum Zur\u00fccksetzen',
       confirmDel:      'Eintrag #{n} l\u00f6schen?',
@@ -739,6 +740,7 @@
       saveErr:         '\u26a0 Save failed \u2013 fallback active',
       entry1:          ' entry',     entryN: ' entries',
       remove:          'Remove',     typeDefault: 'Default',
+      renameType:         'Rename event type',
       delRow:          'Delete entry',
       zeitManual:      'Manual time \u2013 \u21ba Reset to restore',
       confirmDel:      'Delete entry #{n}?',
@@ -787,6 +789,7 @@
       saveErr:         '\u26a0 Ulo\u017een\u00ed selhalo \u2013 z\u00e1loha aktivn\u00ed',
       entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
       remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
+      renameType:         'P\u0159ejmenovat typ ud\u00e1losti',
       delRow:          'Smazat z\u00e1znam',
       zeitManual:      'Ru\u010dn\u00ed \u010das \u2013 \u21ba Reset pro obnoven\u00ed',
       confirmDel:      'Smazat z\u00e1znam #{n}?',
@@ -1149,7 +1152,9 @@
       li.innerHTML = `<span class="type-name">${escHtml(tType(ty))}</span>` +
         (isDefault
           ? `<span style="font-size:10px;color:var(--text-dim);padding:0 2px;" title="${escHtml(t('typeDefault'))}">○</span>`
-          : `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`);
+          : '') +
+        `<button class="btn-edit-type" data-i="${i}" title="${escHtml(t('renameType'))}">✎</button>` +
+        `<button class="btn-del-type" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
       list.appendChild(li);
     });
 
@@ -1348,6 +1353,38 @@
     }, { once: true });
   }
 
+  /* ── Rename a type inline ── */
+  function startRenameType(i, li) {
+    const span = li.querySelector('.type-name');
+    if (!span || li.querySelector('.type-rename-input')) return; /* already editing */
+    const oldName = types[i];
+    const inp = document.createElement('input');
+    inp.type      = 'text';
+    inp.className = 'type-rename-input';
+    inp.value     = tType(oldName);
+    inp.maxLength = 30;
+    span.replaceWith(inp);
+    inp.focus(); inp.select();
+    let cancelled = false;
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter')       { inp.blur(); }
+      else if (e.key === 'Escape') { cancelled = true; inp.blur(); }
+    });
+    function commit() {
+      if (cancelled) { renderTypes(); return; }
+      const newName = inp.value.trim();
+      if (!newName || newName === tType(oldName)) { renderTypes(); return; }
+      if (types.some((ty, j) => j !== i && ty === newName)) {
+        inp.addEventListener('blur', commit, { once: true });
+        inp.focus(); inp.select(); return;
+      }
+      log.forEach(e => { if (e.art === oldName) e.art = newName; });
+      types[i] = newName;
+      save(); renderTypes(); renderLog();
+    }
+    inp.addEventListener('blur', commit, { once: true });
+  }
+
   function addEntry() {
     const zeit   = document.getElementById('fZeit').value   || nowTime();
     const von    = document.getElementById('fVon').value;
@@ -1416,6 +1453,10 @@
   document.getElementById('newTypeInput').addEventListener('keydown', e => { if (e.key === 'Enter') addType(); });
 
   document.getElementById('typeList').addEventListener('click', e => {
+    /* Rename button */
+    const editBtn = e.target.closest('.btn-edit-type');
+    if (editBtn) { startRenameType(parseInt(editBtn.dataset.i, 10), editBtn.closest('li')); return; }
+    /* Delete button */
     const btn = e.target.closest('.btn-del-type');
     if (!btn) return;
     const i = parseInt(btn.dataset.i, 10);
