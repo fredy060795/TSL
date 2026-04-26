@@ -754,6 +754,8 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
     <button class="sprachtafel-btn" id="btnNato" data-i18n-title="natoTitle" title="NATO Alphabet">&#127279; NATO</button>
+    <button class="sprachtafel-btn" id="btnSitrep" title="SITREP">&#128203; SITREP</button>
+    <button class="sprachtafel-btn" id="btnMap" title="Karte / MAP">&#128506; MAP</button>
     <div style="text-align:right;">
       <div class="clock" id="clock">00:00:00</div>
       <div class="save-status" id="saveStatus" data-i18n="saveLoading">Lädt…</div>
@@ -798,6 +800,16 @@
     <tr><td>Y</td><td>YANKEE</td></tr>
     <tr><td>Z</td><td>ZULU</td></tr>
   </table>
+</div>
+
+<div class="sprachtafel-panel" id="sitrepPanel" style="max-width:90vw;">
+  <h3>SITREP</h3>
+  <img src="SITREP.jfif" alt="SITREP" style="max-width:100%;max-height:calc(100vh - 120px);display:block;"/>
+</div>
+
+<div class="sprachtafel-panel" id="mapPanel" style="max-width:90vw;">
+  <h3>Karte / MAP</h3>
+  <img src="KARTE.jpg" alt="Karte" style="max-width:100%;max-height:calc(100vh - 120px);display:block;"/>
 </div>
 
 <div class="layout">
@@ -1498,9 +1510,11 @@
     const panel     = document.getElementById('sprachtafelPanel');
     const natoPanel = document.getElementById('natoPanel');
     const natoBtn   = document.getElementById('btnNato');
-    /* Close NATO panel if open */
+    /* Close other panels if open */
     natoPanel.classList.remove('open');
     if (natoBtn) natoBtn.classList.remove('active');
+    ['sitrepPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
+    ['btnSitrep','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
     if (isOpen) renderSprachtafel();
@@ -1511,10 +1525,30 @@
     const natoPanel  = document.getElementById('natoPanel');
     const funkPanel  = document.getElementById('sprachtafelPanel');
     const funkBtn    = document.getElementById('btnSprachtafel');
-    /* Close Funk panel if open */
+    /* Close other panels if open */
     funkPanel.classList.remove('open');
     if (funkBtn) funkBtn.classList.remove('active');
+    ['sitrepPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
+    ['btnSitrep','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
     const isOpen = natoPanel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
+  });
+
+  document.getElementById('btnSitrep')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    ['sprachtafelPanel','natoPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
+    ['btnSprachtafel','btnNato','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    const panel = document.getElementById('sitrepPanel');
+    const isOpen = panel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
+  });
+
+  document.getElementById('btnMap')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    ['sprachtafelPanel','natoPanel','sitrepPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
+    ['btnSprachtafel','btnNato','btnSitrep'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    const panel = document.getElementById('mapPanel');
+    const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
   });
 
@@ -1534,6 +1568,22 @@
         e.target.id !== 'btnNato') {
       natoPanel.classList.remove('open');
       if (natoBtn) natoBtn.classList.remove('active');
+    }
+    const sitrepPanel = document.getElementById('sitrepPanel');
+    const sitrepBtn   = document.getElementById('btnSitrep');
+    if (sitrepPanel && sitrepPanel.classList.contains('open') &&
+        !sitrepPanel.contains(e.target) &&
+        e.target.id !== 'btnSitrep') {
+      sitrepPanel.classList.remove('open');
+      if (sitrepBtn) sitrepBtn.classList.remove('active');
+    }
+    const mapPanel = document.getElementById('mapPanel');
+    const mapBtn   = document.getElementById('btnMap');
+    if (mapPanel && mapPanel.classList.contains('open') &&
+        !mapPanel.contains(e.target) &&
+        e.target.id !== 'btnMap') {
+      mapPanel.classList.remove('open');
+      if (mapBtn) mapBtn.classList.remove('active');
     }
   });
 
