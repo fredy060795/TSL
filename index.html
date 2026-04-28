@@ -870,7 +870,7 @@
 
   <!-- Unit Sidebar -->
   <div class="sidebar-wrapper" id="sidebarWrapper">
-    <button class="sidebar-toggle" id="sidebarToggle" title="Einstellungen ein-/ausblenden">&#9881;</button>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Einstellungen ein-/ausblenden" aria-label="Einstellungen ein-/ausblenden" aria-expanded="false" aria-controls="sidebarWrapper">&#9881;</button>
   <aside class="sidebar">
     <h2 data-i18n="sidebarUnits">Einheiten</h2>
     <ul class="unit-list" id="unitList"></ul>
@@ -2338,10 +2338,12 @@
   (function() {
     const wrapper = document.getElementById('sidebarWrapper');
     const btn     = document.getElementById('sidebarToggle');
-    const open    = localStorage.getItem('sidebarOpen') === 'true'; // default: closed
+    const open    = localStorage.getItem('sidebarOpen') === 'true'; // defaults to closed if not set
     if (open) wrapper.classList.add('open');
+    btn.setAttribute('aria-expanded', String(open));
     btn.addEventListener('click', function() {
       const isOpen = wrapper.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(isOpen));
       localStorage.setItem('sidebarOpen', isOpen);
     });
   })();
