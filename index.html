@@ -194,6 +194,38 @@
       gap: 0;
     }
 
+    /* ── Sidebar wrapper (slide-out) ── */
+    .sidebar-wrapper {
+      position: relative;
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    /* Gear toggle tab on the left edge */
+    .sidebar-toggle {
+      position: absolute;
+      right: -28px;
+      top: 12px;
+      width: 28px;
+      height: 28px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 4px 4px 0;
+      color: var(--text-dim);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: color 0.15s, border-color 0.15s;
+      padding: 0;
+      line-height: 1;
+    }
+    .sidebar-toggle:hover { color: var(--accent); border-color: var(--accent); }
+    .sidebar-wrapper.open .sidebar-toggle { border-color: var(--accent); color: var(--accent); }
+
     /* ── Unit Sidebar ── */
     .sidebar {
       width: 200px;
@@ -204,6 +236,24 @@
       flex-direction: column;
       padding: 12px 10px;
       gap: 8px;
+      overflow: hidden;
+      transition: width 0.25s ease, padding 0.25s ease, min-width 0.25s ease;
+    }
+    .sidebar-wrapper:not(.open) .sidebar {
+      width: 0;
+      min-width: 0;
+      padding-left: 0;
+      padding-right: 0;
+      border-right-color: transparent;
+    }
+    .sidebar-wrapper:not(.open) .sidebar > * {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .sidebar-wrapper.open .sidebar > * {
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.15s ease 0.1s;
     }
     .sidebar h2 {
       font-size: 11px;
@@ -526,9 +576,13 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 14px 16px;
+      padding: 14px 16px 14px 44px;
       gap: 14px;
       overflow: hidden;
+      transition: padding-left 0.25s ease;
+    }
+    .sidebar-wrapper.open ~ .main {
+      padding-left: 16px;
     }
 
     /* ── Entry Form ── */
@@ -815,6 +869,8 @@
 <div class="layout">
 
   <!-- Unit Sidebar -->
+  <div class="sidebar-wrapper" id="sidebarWrapper">
+    <button class="sidebar-toggle" id="sidebarToggle" title="Einstellungen ein-/ausblenden">&#9881;</button>
   <aside class="sidebar">
     <h2 data-i18n="sidebarUnits">Einheiten</h2>
     <ul class="unit-list" id="unitList"></ul>
@@ -841,6 +897,7 @@
       <button class="btn-add-unit" id="btnAddStatus" data-i18n-title="btnAddStatusTitle" title="Status hinzufügen">+</button>
     </div>
   </aside>
+  </div>
 
   <!-- Main -->
   <main class="main">
@@ -2277,6 +2334,18 @@
   load().then(() => {
     applyLang();  /* sets lang, renders all panels, applies translations */
   });
+  /* ── Sidebar toggle ── */
+  (function() {
+    const wrapper = document.getElementById('sidebarWrapper');
+    const btn     = document.getElementById('sidebarToggle');
+    const open    = localStorage.getItem('sidebarOpen') === 'true'; // default: closed
+    if (open) wrapper.classList.add('open');
+    btn.addEventListener('click', function() {
+      const isOpen = wrapper.classList.toggle('open');
+      localStorage.setItem('sidebarOpen', isOpen);
+    });
+  })();
+
 </script>
 </body>
 </html>
