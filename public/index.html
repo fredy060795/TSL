@@ -952,6 +952,7 @@
         <h2 data-i18n="logTitle">Lagetagebuch</h2>
         <div style="display:flex;align-items:center;gap:4px;">
           <span class="log-count" id="logCount">0 Einträge</span>
+          <button class="btn-export" id="btnSortLog" title="Sortierung wechseln">↓ Neueste zuerst</button>
           <button class="btn-export" id="btnExport" data-i18n="btnExport" data-i18n-title="btnExportTitle" title="Als CSV exportieren">⬇ Export</button>
           <button class="btn-clear-log" id="btnClear" data-i18n="btnClear" data-i18n-title="btnClearTitle" title="Alle Einträge löschen">✕ Leeren</button>
         </div>
@@ -1009,6 +1010,9 @@
       btnExportTitle:  'Als CSV exportieren',
       btnClear:        '\u2715 Leeren',
       btnClearTitle:   'Alle Eintr\u00e4ge l\u00f6schen',
+      logSortNewest:   '\u2193 Neueste zuerst',
+      logSortOldest:   '\u2191 \u00c4lteste zuerst',
+      logSortTitle:    'Sortierung wechseln',
       thNr: 'Nr', thZeit: 'Zeit', thVon: 'Von', thAn: 'An', thArt: 'Art', thInhalt: 'Inhalt',
       emptyState:      'Noch keine Eintr\u00e4ge vorhanden.',
       saveLoading:     'L\u00e4dt\u2026',
@@ -1078,6 +1082,9 @@
       btnExportTitle:  'Export as CSV',
       btnClear:        '\u2715 Clear',
       btnClearTitle:   'Delete all entries',
+      logSortNewest:   '\u2193 Newest first',
+      logSortOldest:   '\u2191 Oldest first',
+      logSortTitle:    'Toggle sort order',
       thNr: 'No', thZeit: 'Time', thVon: 'From', thAn: 'To', thArt: 'Type', thInhalt: 'Content',
       emptyState:      'No entries yet.',
       saveLoading:     'Loading\u2026',
@@ -1147,6 +1154,9 @@
       btnExportTitle:  'Exportovat jako CSV',
       btnClear:        '\u2715 Vymazat',
       btnClearTitle:   'Smazat v\u0161echny z\u00e1znamy',
+      logSortNewest:   '\u2193 Nejnov\u011bj\u0161\u00ed naho\u0159e',
+      logSortOldest:   '\u2191 Nejstar\u0161\u00ed naho\u0159e',
+      logSortTitle:    'P\u0159epnout \u0159azen\u00ed',
       thNr: 'Nr', thZeit: '\u010cas', thVon: 'Od', thAn: 'Pro', thArt: 'Typ', thInhalt: 'Obsah',
       emptyState:      '\u017d\u00e1dn\u00e9 z\u00e1znamy.',
       saveLoading:     'Na\u010d\u00edt\u00e1m\u2026',
@@ -1239,6 +1249,7 @@
   let units = [];
   let types = [];
   let log   = [];
+  let logSortOrder = localStorage.getItem('tsl_logSortOrder') === 'asc' ? 'asc' : 'desc';
   let unitStatuses   = {};   /* { unitName: 'active'|'base'|'kia'|'unknown'|'cs_...' } */
   let customStatuses = [];   /* [{ id: 'cs_...', label: string, color?: {bg,color,border} }] */
   let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
@@ -1931,6 +1942,14 @@
   function renderLog(scrollToBottom = false) {
     const tbody = document.getElementById('logBody');
     const count = document.getElementById('logCount');
+    const wrap  = document.querySelector('.table-wrap');
+    const rows  = logSortOrder === 'desc'
+      ? log.map((entry, index) => ({ entry, index })).reverse()
+      : log.map((entry, index) => ({ entry, index }));
+    const sortBtn = document.getElementById('btnSortLog');
+    sortBtn.textContent = t(logSortOrder === 'desc' ? 'logSortNewest' : 'logSortOldest');
+    sortBtn.title = t('logSortTitle');
+    sortBtn.setAttribute('aria-label', t('logSortTitle'));
     count.textContent = log.length + (log.length === 1 ? t('entry1') : t('entryN'));
 
     if (log.length === 0) {
@@ -1938,7 +1957,7 @@
       return;
     }
     tbody.innerHTML = '';
-    log.forEach((e, i) => {
+    rows.forEach(({ entry: e, index: i }) => {
       const tr = document.createElement('tr');
       const tp = typeColors[e.art] || BUILTIN_TYPE_COLORS[e.art] || null;
       const badgeStyle = tp ? ` style="background:${tp.bg};color:${tp.color};"` : '';
@@ -1954,8 +1973,7 @@
       tbody.appendChild(tr);
     });
     if (scrollToBottom) {
-      const wrap = document.querySelector('.table-wrap');
-      wrap.scrollTop = wrap.scrollHeight;
+      wrap.scrollTop = logSortOrder === 'desc' ? 0 : wrap.scrollHeight;
     }
   }
 
@@ -2267,8 +2285,11 @@
   function exportCSV() {
     if (log.length === 0) return;
     const header = t('csvHeader') + '\n';
-    const rows   = log.map((e, i) =>
-      [i+1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
+    const rows   = (logSortOrder === 'desc'
+      ? log.map((entry, index) => ({ entry, index })).reverse()
+      : log.map((entry, index) => ({ entry, index }))
+    ).map(({ entry: e, index: i }) =>
+      [i + 1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
     ).join('\n');
     const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
@@ -2363,6 +2384,11 @@
   });
 
   document.getElementById('btnLog').addEventListener('click', addEntry);
+  document.getElementById('btnSortLog').addEventListener('click', () => {
+    logSortOrder = logSortOrder === 'desc' ? 'asc' : 'desc';
+    localStorage.setItem('tsl_logSortOrder', logSortOrder);
+    renderLog();
+  });
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
 
   document.getElementById('btnReset').addEventListener('click', () => {
