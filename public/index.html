@@ -952,7 +952,7 @@
         <h2 data-i18n="logTitle">Lagetagebuch</h2>
         <div style="display:flex;align-items:center;gap:4px;">
           <span class="log-count" id="logCount">0 Einträge</span>
-          <button class="btn-export" id="btnSortLog" title="Sortierung wechseln">↓ Neueste zuerst</button>
+          <button class="btn-export" id="btnSortLog" title="Sortierung wechseln" aria-label="Sortierung wechseln">↓ Neueste zuerst</button>
           <button class="btn-export" id="btnExport" data-i18n="btnExport" data-i18n-title="btnExportTitle" title="Als CSV exportieren">⬇ Export</button>
           <button class="btn-clear-log" id="btnClear" data-i18n="btnClear" data-i18n-title="btnClearTitle" title="Alle Einträge löschen">✕ Leeren</button>
         </div>
@@ -1255,7 +1255,7 @@
     if (savedLogSortOrder === 'asc' || savedLogSortOrder === 'desc') {
       logSortOrder = savedLogSortOrder;
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Loading log sort order failed:', e); }
   let unitStatuses   = {};   /* { unitName: 'active'|'base'|'kia'|'unknown'|'cs_...' } */
   let customStatuses = [];   /* [{ id: 'cs_...', label: string, color?: {bg,color,border} }] */
   let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
@@ -2393,7 +2393,8 @@
   document.getElementById('btnLog').addEventListener('click', addEntry);
   document.getElementById('btnSortLog').addEventListener('click', () => {
     logSortOrder = logSortOrder === 'desc' ? 'asc' : 'desc';
-    try { localStorage.setItem('tsl_logSortOrder', logSortOrder); } catch(e) {}
+    try { localStorage.setItem('tsl_logSortOrder', logSortOrder); }
+    catch(e) { console.warn('Saving log sort order failed:', e); }
     renderLog();
   });
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
