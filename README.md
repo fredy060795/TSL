@@ -30,6 +30,8 @@ npm install
 start.bat
 ```
 
+`start.bat` prüft fehlende Node-Abhängigkeiten automatisch und führt bei Bedarf `npm install` aus.
+
 **Linux / macOS / CMD:**
 ```bash
 node server.js
