@@ -8,7 +8,8 @@ if errorlevel 1 (
   goto :end
 )
 
-if not exist "node_modules\express\package.json" (
+call npm ls --depth=0 >nul 2>nul
+if errorlevel 1 (
   echo Fehlende Pakete erkannt. Starte npm install...
   call npm install
   if errorlevel 1 (
@@ -17,7 +18,7 @@ if not exist "node_modules\express\package.json" (
   )
 )
 
-echo Starting TSL Backend on Port 5008...
+echo Starte TSL Backend auf Port 5008...
 call npm start
 
 if errorlevel 1 (
