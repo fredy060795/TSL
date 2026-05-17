@@ -30,7 +30,7 @@ npm install
 start.bat
 ```
 
-`start.bat` prueft fehlende Node-Abhaengigkeiten automatisch und fuehrt bei Bedarf `npm install` aus.
+`start.bat` prüft fehlende Node-Abhängigkeiten automatisch und führt bei Bedarf `npm install` aus.
 
 **Linux / macOS / CMD:**
 ```bash
