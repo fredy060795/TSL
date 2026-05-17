@@ -9,7 +9,7 @@ if errorlevel 1 (
 )
 
 if not exist "node_modules\express\package.json" (
-  echo Fehlende Abhaengigkeiten erkannt. Fuehre npm install aus...
+  echo Fehlende Pakete erkannt. Starte npm install...
   call npm install
   if errorlevel 1 (
     echo npm install ist fehlgeschlagen. Der Server konnte nicht gestartet werden.
