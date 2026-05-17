@@ -1249,7 +1249,13 @@
   let units = [];
   let types = [];
   let log   = [];
-  let logSortOrder = localStorage.getItem('tsl_logSortOrder') === 'asc' ? 'asc' : 'desc';
+  let logSortOrder = 'desc';
+  try {
+    const savedLogSortOrder = localStorage.getItem('tsl_logSortOrder');
+    if (savedLogSortOrder === 'asc' || savedLogSortOrder === 'desc') {
+      logSortOrder = savedLogSortOrder;
+    }
+  } catch(e) {}
   let unitStatuses   = {};   /* { unitName: 'active'|'base'|'kia'|'unknown'|'cs_...' } */
   let customStatuses = [];   /* [{ id: 'cs_...', label: string, color?: {bg,color,border} }] */
   let builtinStatuses = ['active', 'base', 'kia', 'unknown'];  /* mutable, persisted */
@@ -1939,13 +1945,17 @@
     return map[art] || 'badge-sonstiges';
   }
 
+  function getSortedLogEntries() {
+    const entries = log.map((entry, index) => ({ entry, index }));
+    if (logSortOrder === 'desc') entries.reverse();
+    return entries;
+  }
+
   function renderLog(scrollToBottom = false) {
     const tbody = document.getElementById('logBody');
     const count = document.getElementById('logCount');
     const wrap  = document.querySelector('.table-wrap');
-    const rows  = logSortOrder === 'desc'
-      ? log.map((entry, index) => ({ entry, index })).reverse()
-      : log.map((entry, index) => ({ entry, index }));
+    const rows  = getSortedLogEntries();
     const sortBtn = document.getElementById('btnSortLog');
     sortBtn.textContent = t(logSortOrder === 'desc' ? 'logSortNewest' : 'logSortOldest');
     sortBtn.title = t('logSortTitle');
@@ -2285,10 +2295,7 @@
   function exportCSV() {
     if (log.length === 0) return;
     const header = t('csvHeader') + '\n';
-    const rows   = (logSortOrder === 'desc'
-      ? log.map((entry, index) => ({ entry, index })).reverse()
-      : log.map((entry, index) => ({ entry, index }))
-    ).map(({ entry: e, index: i }) =>
+    const rows   = getSortedLogEntries().map(({ entry: e, index: i }) =>
       [i + 1, e.zeit, e.von, e.an, e.art, '"' + e.inhalt.replace(/"/g,'""') + '"'].join(';')
     ).join('\n');
     const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
@@ -2386,7 +2393,7 @@
   document.getElementById('btnLog').addEventListener('click', addEntry);
   document.getElementById('btnSortLog').addEventListener('click', () => {
     logSortOrder = logSortOrder === 'desc' ? 'asc' : 'desc';
-    localStorage.setItem('tsl_logSortOrder', logSortOrder);
+    try { localStorage.setItem('tsl_logSortOrder', logSortOrder); } catch(e) {}
     renderLog();
   });
   document.getElementById('fInhalt').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
