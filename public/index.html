@@ -1330,14 +1330,14 @@
 
 <header>
   <div class="hero-copy">
-    <div class="hero-eyebrow">Persistent Systems Produktoberfläche</div>
+    <div class="hero-eyebrow" data-i18n="heroEyebrow">Persistent Systems Produktoberfläche</div>
     <h1>TSL &mdash; Tactical Situation Log</h1>
     <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
-    <p class="hero-description">TSL verbindet Lagebild, strukturiertes Funk-Logging und Medical-Workflows in einer einheitlichen, produktorientierten Oberfläche.</p>
+    <p class="hero-description" data-i18n="heroDescription">TSL verbindet Lagebild, strukturiertes Funk-Logging und Medical-Workflows in einer einheitlichen, produktorientierten Oberfläche.</p>
     <div class="hero-tags">
-      <span class="hero-tag">Lagebild</span>
-      <span class="hero-tag">Funkprotokoll</span>
-      <span class="hero-tag">Medical-Support</span>
+      <span class="hero-tag" data-i18n="heroTagOne">Lagebild</span>
+      <span class="hero-tag" data-i18n="heroTagTwo">Funkprotokoll</span>
+      <span class="hero-tag" data-i18n="heroTagThree">Medical-Support</span>
     </div>
   </div>
   <div class="header-controls">
@@ -1363,19 +1363,19 @@
 
 <section class="overview-grid" aria-label="TSL product overview">
   <article class="overview-card">
-    <span class="overview-label">Einsatzübersicht</span>
-    <h2>Klarer Produktauftritt</h2>
-    <p>Die Oberfläche orientiert sich jetzt stärker an einer hellen, strukturierten Produktseite mit klaren Informationsblöcken.</p>
+    <span class="overview-label" data-i18n="overviewLabelOne">Einsatzübersicht</span>
+    <h2 data-i18n="overviewTitleOne">Klarer Produktauftritt</h2>
+    <p data-i18n="overviewTextOne">Die Oberfläche orientiert sich jetzt stärker an einer hellen, strukturierten Produktseite mit klaren Informationsblöcken.</p>
   </article>
   <article class="overview-card">
-    <span class="overview-label">Arbeitsbereich</span>
-    <h2>Schneller Zugriff</h2>
-    <p>Sprachtafel, NATO, Medical, SITREP, Karte und Notizen bleiben als zentrale Schnellaktionen direkt im Kopfbereich erreichbar.</p>
+    <span class="overview-label" data-i18n="overviewLabelTwo">Arbeitsbereich</span>
+    <h2 data-i18n="overviewTitleTwo">Schneller Zugriff</h2>
+    <p data-i18n="overviewTextTwo">Sprachtafel, NATO, Medical, SITREP, Karte und Notizen bleiben als zentrale Schnellaktionen direkt im Kopfbereich erreichbar.</p>
   </article>
   <article class="overview-card">
-    <span class="overview-label">Protokollierung</span>
-    <h2>Einheitliches Layout</h2>
-    <p>Konfiguration, Lagebild und Einsatzprotokoll nutzen denselben Kartenstil, damit TSL optisch besser zu weiteren Persistent Systems Produkten passt.</p>
+    <span class="overview-label" data-i18n="overviewLabelThree">Protokollierung</span>
+    <h2 data-i18n="overviewTitleThree">Einheitliches Layout</h2>
+    <p data-i18n="overviewTextThree">Konfiguration, Lagebild und Einsatzprotokoll nutzen denselben Kartenstil, damit TSL optisch besser zu weiteren Persistent Systems Produkten passt.</p>
   </article>
 </section>
 
@@ -1770,6 +1770,20 @@
   const LANGS = {
     de: {
       subtitle:        'Lagemeldung \u2022 Funkverkehr \u2022 Echtzeit',
+      heroEyebrow:     'Persistent Systems Produktoberfläche',
+      heroDescription: 'TSL verbindet Lagebild, strukturiertes Funk-Logging und Medical-Workflows in einer einheitlichen, produktorientierten Oberfläche.',
+      heroTagOne:      'Lagebild',
+      heroTagTwo:      'Funkprotokoll',
+      heroTagThree:    'Medical-Support',
+      overviewLabelOne:   'Einsatzübersicht',
+      overviewTitleOne:   'Klarer Produktauftritt',
+      overviewTextOne:    'Die Oberfläche orientiert sich jetzt stärker an einer hellen, strukturierten Produktseite mit klaren Informationsblöcken.',
+      overviewLabelTwo:   'Arbeitsbereich',
+      overviewTitleTwo:   'Schneller Zugriff',
+      overviewTextTwo:    'Sprachtafel, NATO, Medical, SITREP, Karte und Notizen bleiben als zentrale Schnellaktionen direkt im Kopfbereich erreichbar.',
+      overviewLabelThree: 'Protokollierung',
+      overviewTitleThree: 'Einheitliches Layout',
+      overviewTextThree:  'Konfiguration, Lagebild und Einsatzprotokoll nutzen denselben Kartenstil, damit TSL optisch besser zu weiteren Persistent Systems Produkten passt.',
       sidebarUnits:    'Einheiten',
       unitPlaceholder: 'Einheit\u2026',
       btnAddUnitTitle: 'Einheit hinzuf\u00fcgen',
@@ -1959,6 +1973,20 @@
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
+      heroEyebrow:     'Persistent Systems Product Interface',
+      heroDescription: 'TSL combines status awareness, structured radio logging, and medical workflows in one consistent, product-oriented interface.',
+      heroTagOne:      'Status board',
+      heroTagTwo:      'Radio log',
+      heroTagThree:    'Medical support',
+      overviewLabelOne:   'Mission overview',
+      overviewTitleOne:   'Clear product presentation',
+      overviewTextOne:    'The interface now follows a lighter, structured product-page design with clearly separated information blocks.',
+      overviewLabelTwo:   'Workspace',
+      overviewTitleTwo:   'Fast access',
+      overviewTextTwo:    'Radio table, NATO, medical, SITREP, map, and notes remain available as primary quick actions in the header.',
+      overviewLabelThree: 'Logging',
+      overviewTitleThree: 'Consistent layout',
+      overviewTextThree:  'Configuration, status board, and operational log now share the same card treatment so TSL fits better with other Persistent Systems products.',
       sidebarUnits:    'Units',
       unitPlaceholder: 'Unit\u2026',
       btnAddUnitTitle: 'Add unit',
@@ -2148,6 +2176,20 @@
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
+      heroEyebrow:     'Produktové rozhraní Persistent Systems',
+      heroDescription: 'TSL spojuje přehled situace, strukturované rádiové protokolování a zdravotnické workflow do jednoho konzistentního produktového rozhraní.',
+      heroTagOne:      'Přehled stavu',
+      heroTagTwo:      'Rádiový protokol',
+      heroTagThree:    'Zdravotnická podpora',
+      overviewLabelOne:   'Přehled mise',
+      overviewTitleOne:   'Jasný produktový vzhled',
+      overviewTextOne:    'Rozhraní nyní více odpovídá světlé, strukturované produktové stránce s jasně oddělenými informačními bloky.',
+      overviewLabelTwo:   'Pracovní prostor',
+      overviewTitleTwo:   'Rychlý přístup',
+      overviewTextTwo:    'Tabulka spojení, NATO, zdravotnický panel, SITREP, mapa a poznámky zůstávají v hlavičce jako hlavní rychlé akce.',
+      overviewLabelThree: 'Protokolování',
+      overviewTitleThree: 'Jednotné rozvržení',
+      overviewTextThree:  'Konfigurace, přehled stavu a operační deník nyní používají stejný styl karet, takže TSL lépe zapadá mezi další produkty Persistent Systems.',
       sidebarUnits:    'Jednotky',
       unitPlaceholder: 'Jednotka\u2026',
       btnAddUnitTitle: 'P\u0159idat jednotku',
