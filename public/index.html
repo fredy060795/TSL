@@ -525,6 +525,12 @@
     }
     .unit-list li:hover { background: var(--panel-2); border-color: var(--border); }
     .unit-list li .unit-name { flex: 1; }
+    .unit-list li .unit-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .unit-list li .btn-move-unit,
     .unit-list li .btn-del-unit {
       background: none;
       border: none;
@@ -533,6 +539,11 @@
       font-size: 12px;
       padding: 0 2px;
       line-height: 1;
+    }
+    .unit-list li .btn-move-unit:hover { color: var(--accent); }
+    .unit-list li .btn-move-unit:disabled {
+      color: var(--border);
+      cursor: default;
     }
     .unit-list li .btn-del-unit:hover { color: var(--red); }
 
@@ -1265,50 +1276,50 @@
           <label for="medicalPriority">Priority</label>
           <select id="medicalPriority">
             <option value="">Select</option>
-            <option>Routine</option>
-            <option>Urgent</option>
-            <option>Priority</option>
-            <option>Immediate</option>
+            <option value="routine">Routine</option>
+            <option value="urgent">Urgent</option>
+            <option value="priority">Priority</option>
+            <option value="immediate">Immediate</option>
           </select>
         </div>
         <div class="medical-field">
           <label for="medicalConsciousness">Consciousness</label>
           <select id="medicalConsciousness">
             <option value="">Select</option>
-            <option>Alert</option>
-            <option>Responds to voice</option>
-            <option>Responds to pain</option>
-            <option>Unresponsive</option>
+            <option value="alert">Alert</option>
+            <option value="voice">Responds to voice</option>
+            <option value="pain">Responds to pain</option>
+            <option value="unresponsive">Unresponsive</option>
           </select>
         </div>
         <div class="medical-field">
           <label for="medicalBreathing">Breathing</label>
           <select id="medicalBreathing">
             <option value="">Select</option>
-            <option>Normal</option>
-            <option>Laboured</option>
-            <option>Irregular</option>
-            <option>Absent</option>
+            <option value="normal">Normal</option>
+            <option value="laboured">Laboured</option>
+            <option value="irregular">Irregular</option>
+            <option value="absent">Absent</option>
           </select>
         </div>
         <div class="medical-field">
           <label for="medicalCirculation">Circulation</label>
           <select id="medicalCirculation">
             <option value="">Select</option>
-            <option>Stable</option>
-            <option>Weak pulse</option>
-            <option>Shock signs</option>
-            <option>No pulse</option>
+            <option value="stable">Stable</option>
+            <option value="weak_pulse">Weak pulse</option>
+            <option value="shock_signs">Shock signs</option>
+            <option value="no_pulse">No pulse</option>
           </select>
         </div>
         <div class="medical-field">
           <label for="medicalBleeding">Bleeding</label>
           <select id="medicalBleeding">
             <option value="">Select</option>
-            <option>None</option>
-            <option>Controlled</option>
-            <option>Moderate</option>
-            <option>Severe / uncontrolled</option>
+            <option value="none">None</option>
+            <option value="controlled">Controlled</option>
+            <option value="moderate">Moderate</option>
+            <option value="severe">Severe / uncontrolled</option>
           </select>
         </div>
         <div class="medical-field">
@@ -1323,12 +1334,12 @@
           <label for="medicalPosition">Position / immediate care</label>
           <select id="medicalPosition">
             <option value="">Select</option>
-            <option>Recovery position</option>
-            <option>CPR in progress</option>
-            <option>Shock position</option>
-            <option>Direct pressure / tourniquet</option>
-            <option>Immobilised / splinted</option>
-            <option>Self-ambulatory</option>
+            <option value="recovery_position">Recovery position</option>
+            <option value="cpr_in_progress">CPR in progress</option>
+            <option value="shock_position">Shock position</option>
+            <option value="direct_pressure">Direct pressure / tourniquet</option>
+            <option value="immobilised">Immobilised / splinted</option>
+            <option value="self_ambulatory">Self-ambulatory</option>
           </select>
         </div>
       </div>
@@ -1574,6 +1585,8 @@
       saveErr:         '\u26a0 Speichern fehlgeschlagen \u2013 Fallback aktiv',
       entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
       remove:          'Entfernen',  typeDefault: 'Standard',
+      moveUp:          'Nach oben',
+      moveDown:        'Nach unten',
       renameType:         'Ereignisart umbenennen',
       colorType:          'Farbe \u00e4ndern',
       delRow:          'Eintrag l\u00f6schen',
@@ -1582,7 +1595,7 @@
       confirmClear:    'Alle {n} Eintr\u00e4ge l\u00f6schen?',
       csvHeader:       'Nr;Zeit;Von;An;Art;Inhalt',
       typeNames: { 'Anforderung':'Anforderung','Truppenmeldung':'Truppenmeldung',
-                   'Feindmeldung':'Feindmeldung','Meldung':'Meldung','Sonstiges':'Sonstiges' },
+                   'Feindmeldung':'Feindmeldung','Meldung':'Meldung','Sonstiges':'Sonstiges','Medical':'Sanität' },
       lagebild:        'Lagebild',
       status_active:   'Aktiv',
       status_base:     'Basis',
@@ -1604,6 +1617,117 @@
       notesTitle:         'Notizen',
       notesLabel:         'Notizinhalt',
       notesPlaceholder:   'Freie Notizen…',
+      medicalUi: {
+        buttonLabel: 'Sanität',
+        buttonAria: 'Medical-Notfallpanel öffnen',
+        panelTitle: 'Medical-Notfallablauf',
+        panelSubtitle: 'Deutsche Dokumentation & automatischer Logeintrag',
+        sections: ['1. Funk / Einsatzübersicht', '2. Patienteneinschätzung', '3. Vorgeschichte / SAMPLE', '4. Evakuierung / Dokumentation'],
+        fieldLabels: {
+          medicalFrequency: 'Notruffrequenz',
+          medicalReportingUnit: 'Meldende Einheit',
+          medicalReceivingUnit: 'Empfangende Stelle',
+          medicalCasualtyCount: 'Anzahl Verwundeter',
+          medicalWho: 'Wer ist verletzt?',
+          medicalWhat: 'Was ist passiert?',
+          medicalWhere: 'Wo befindet sich der Verwundete?',
+          medicalRendezvous: 'Treffpunkt',
+          medicalTeam: 'Sanitätsteam',
+          medicalPriority: 'Priorität',
+          medicalConsciousness: 'Bewusstsein',
+          medicalBreathing: 'Atmung',
+          medicalCirculation: 'Kreislauf',
+          medicalBleeding: 'Blutung',
+          medicalFractures: 'Frakturen / Verletzungen',
+          medicalSymptoms: 'Symptome',
+          medicalPosition: 'Lagerung / Sofortmaßnahme',
+          medicalAllergies: 'Allergien',
+          medicalMedication: 'Medikation',
+          medicalConditions: 'Vorerkrankungen',
+          medicalLastIntake: 'Letzte orale Aufnahme',
+          medicalEvents: 'Ereignisse vor dem Vorfall',
+          medicalTransport: 'Transportplan',
+          medicalDestination: 'Ziel',
+          medicalNotes: 'Dokumentationsnotizen',
+        },
+        placeholders: {
+          medicalFrequency: 'z. B. 35.425 MHz',
+          medicalReportingUnit: 'Wer meldet?',
+          medicalReceivingUnit: 'Wer empfängt den Funkverkehr?',
+          medicalCasualtyCount: '1',
+          medicalWho: 'Patient / Team / Kennung',
+          medicalWhat: 'Verletzungsmechanismus / Kurzlage',
+          medicalWhere: 'Genaue Position / Gitter / Landmarke',
+          medicalRendezvous: 'Treffpunkt für das San-Team',
+          medicalTeam: 'Zugewiesene Sanitäter / Rettungsmittel',
+          medicalFractures: 'Fraktur, Verbrennung, Trauma, Wunde …',
+          medicalSymptoms: 'Schmerz, Dyspnoe, Schwindel, Übelkeit …',
+          medicalAllergies: 'Bekannte Allergien',
+          medicalMedication: 'Aktuelle Medikation',
+          medicalConditions: 'Erkrankungen / Vorgeschichte',
+          medicalLastIntake: 'Essen / Trinken / Zeit',
+          medicalEvents: 'Symptome vor dem Notfall, Mechanismus, Zeitablauf …',
+          medicalTransport: 'Zu Fuß / Trage / Rettungswagen / Hubschrauber',
+          medicalDestination: 'San-Station / CCP / Krankenhaus',
+          medicalNotes: 'Weitere Maßnahmen, Vitaltrend, Übergabenotizen …',
+        },
+        selectOptions: {
+          medicalPriority: { '': 'Auswählen', routine: 'Routine', urgent: 'Dringend', priority: 'Priorität', immediate: 'Sofort' },
+          medicalConsciousness: { '': 'Auswählen', alert: 'Wach', voice: 'Reagiert auf Ansprache', pain: 'Reagiert auf Schmerz', unresponsive: 'Nicht ansprechbar' },
+          medicalBreathing: { '': 'Auswählen', normal: 'Normal', laboured: 'Erschwert', irregular: 'Unregelmäßig', absent: 'Keine' },
+          medicalCirculation: { '': 'Auswählen', stable: 'Stabil', weak_pulse: 'Schwacher Puls', shock_signs: 'Schockzeichen', no_pulse: 'Kein Puls' },
+          medicalBleeding: { '': 'Auswählen', none: 'Keine', controlled: 'Kontrolliert', moderate: 'Mittel', severe: 'Stark / unkontrolliert' },
+          medicalPosition: { '': 'Auswählen', recovery_position: 'Stabile Seitenlage', cpr_in_progress: 'Reanimation läuft', shock_position: 'Schocklage', direct_pressure: 'Direkter Druck / Tourniquet', immobilised: 'Immobilisiert / geschient', self_ambulatory: 'Gehfähig' },
+        },
+        flags: {
+          medicalFlagUnconscious: 'Bewusstlosigkeit',
+          medicalFlagCardiacArrest: 'Herz-Kreislauf-Stillstand',
+          medicalFlagCollapse: 'Kreislaufkollaps',
+          medicalFlagBleeding: 'Starke Blutung',
+          medicalFlagFracture: 'Verdacht auf Fraktur',
+        },
+        cards: [
+          { title: 'Bewusstlos', steps: ['Atemwege sichern.', 'Bei Atmung stabile Seitenlage.', 'Reaktion fortlaufend überwachen.'] },
+          { title: 'Herz-Kreislauf-Stillstand', steps: ['AED anfordern.', 'Sofort Reanimation beginnen.', 'Thoraxkompressionen ohne Unterbrechung fortführen.'] },
+          { title: 'Kreislaufkollaps', steps: ['Wärme-/Kältestress kontrollieren.', 'Patient wenn möglich flach lagern.', 'Schnelle Evakuierung vorbereiten.'] },
+          { title: 'Starke Blutung', steps: ['Direkten Druck ausüben.', 'Bei Bedarf Tourniquet / Tamponade anwenden.', 'Durchblutung und Blutverlust erneut beurteilen.'] },
+          { title: 'Frakturen', steps: ['Immobilisieren.', 'Distale Durchblutung prüfen.', 'Nur zur Gefahrenabwehr bewegen.'] },
+        ],
+        previewTitle: 'Auto-Log Vorschau',
+        previewEmpty: 'Felder ausfüllen, um den automatischen Medical-Logeintrag zu erstellen.',
+        summaryStored: 'Die Zusammenfassung wird automatisch im Log gespeichert.',
+        resetButton: 'Zurücksetzen',
+        resetTitle: 'Medical-Formular zurücksetzen',
+        createLogButton: 'Medical-Logeintrag erstellen',
+        summaryLabels: {
+          frequency: 'Frequenz',
+          from: 'Von',
+          to: 'An',
+          casualties: 'Verwundete',
+          who: 'Wer',
+          what: 'Was',
+          where: 'Wo',
+          priority: 'Priorität',
+          consciousness: 'Bewusstsein',
+          breathing: 'Atmung',
+          circulation: 'Kreislauf',
+          bleeding: 'Blutung',
+          injuries: 'Verletzungen',
+          symptoms: 'Symptome',
+          care: 'Versorgung',
+          redFlags: 'Warnzeichen',
+          allergies: 'Allergien',
+          medication: 'Medikation',
+          conditions: 'Vorerkrankungen',
+          lastIntake: 'Letzte Aufnahme',
+          events: 'Ereignisse',
+          rendezvous: 'Treffpunkt',
+          medTeam: 'San-Team',
+          transport: 'Transport',
+          destination: 'Ziel',
+          notes: 'Notizen',
+        },
+      },
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1650,6 +1774,8 @@
       saveErr:         '\u26a0 Save failed \u2013 fallback active',
       entry1:          ' entry',     entryN: ' entries',
       remove:          'Remove',     typeDefault: 'Default',
+      moveUp:          'Move up',
+      moveDown:        'Move down',
       renameType:         'Rename event type',
       colorType:          'Change color',
       delRow:          'Delete entry',
@@ -1658,7 +1784,7 @@
       confirmClear:    'Delete all {n} entries?',
       csvHeader:       'No;Time;From;To;Type;Content',
       typeNames: { 'Anforderung':'Request','Truppenmeldung':'Troops report',
-                   'Feindmeldung':'Enemy report','Meldung':'Report','Sonstiges':'Other' },
+                   'Feindmeldung':'Enemy report','Meldung':'Report','Sonstiges':'Other','Medical':'Medical' },
       lagebild:        'Status Board',
       status_active:   'Active',
       status_base:     'Base',
@@ -1680,6 +1806,117 @@
       notesTitle:         'Notes',
       notesLabel:         'Notes content',
       notesPlaceholder:   'Free notes…',
+      medicalUi: {
+        buttonLabel: 'Medical',
+        buttonAria: 'Open medical emergency workflow panel',
+        panelTitle: 'Medical Emergency Workflow',
+        panelSubtitle: 'English documentation & auto log entry',
+        sections: ['1. Radio / Incident Overview', '2. Patient Assessment', '3. Medical History / SAMPLE', '4. Evacuation / Documentation'],
+        fieldLabels: {
+          medicalFrequency: 'Emergency frequency',
+          medicalReportingUnit: 'Reporting unit',
+          medicalReceivingUnit: 'Receiving station',
+          medicalCasualtyCount: 'Number of casualties',
+          medicalWho: 'Who is injured?',
+          medicalWhat: 'What happened?',
+          medicalWhere: 'Where is the casualty?',
+          medicalRendezvous: 'Rendezvous point',
+          medicalTeam: 'Medical team',
+          medicalPriority: 'Priority',
+          medicalConsciousness: 'Consciousness',
+          medicalBreathing: 'Breathing',
+          medicalCirculation: 'Circulation',
+          medicalBleeding: 'Bleeding',
+          medicalFractures: 'Fractures / injuries',
+          medicalSymptoms: 'Symptoms',
+          medicalPosition: 'Position / immediate care',
+          medicalAllergies: 'Allergies',
+          medicalMedication: 'Medication',
+          medicalConditions: 'Medical conditions',
+          medicalLastIntake: 'Last oral intake',
+          medicalEvents: 'Events before incident',
+          medicalTransport: 'Transport plan',
+          medicalDestination: 'Destination',
+          medicalNotes: 'Documentation notes',
+        },
+        placeholders: {
+          medicalFrequency: 'e.g. 35.425 MHz',
+          medicalReportingUnit: 'Who is calling?',
+          medicalReceivingUnit: 'Who receives the traffic?',
+          medicalCasualtyCount: '1',
+          medicalWho: 'Patient / team / identifier',
+          medicalWhat: 'Mechanism of injury / incident summary',
+          medicalWhere: 'Exact location / grid / landmark',
+          medicalRendezvous: 'Meeting point for the med team',
+          medicalTeam: 'Assigned medics / ambulance',
+          medicalFractures: 'Fracture, burn, trauma, wound...',
+          medicalSymptoms: 'Pain, dyspnoea, dizziness, nausea...',
+          medicalAllergies: 'Known allergies',
+          medicalMedication: 'Current medication',
+          medicalConditions: 'Diseases / history',
+          medicalLastIntake: 'Food / drink / time',
+          medicalEvents: 'Symptoms before the emergency, mechanism, timeline...',
+          medicalTransport: 'Walking / stretcher / ambulance / helicopter',
+          medicalDestination: 'Aid station / CCP / hospital',
+          medicalNotes: 'Further actions, vital trends, handover notes...',
+        },
+        selectOptions: {
+          medicalPriority: { '': 'Select', routine: 'Routine', urgent: 'Urgent', priority: 'Priority', immediate: 'Immediate' },
+          medicalConsciousness: { '': 'Select', alert: 'Alert', voice: 'Responds to voice', pain: 'Responds to pain', unresponsive: 'Unresponsive' },
+          medicalBreathing: { '': 'Select', normal: 'Normal', laboured: 'Laboured', irregular: 'Irregular', absent: 'Absent' },
+          medicalCirculation: { '': 'Select', stable: 'Stable', weak_pulse: 'Weak pulse', shock_signs: 'Shock signs', no_pulse: 'No pulse' },
+          medicalBleeding: { '': 'Select', none: 'None', controlled: 'Controlled', moderate: 'Moderate', severe: 'Severe / uncontrolled' },
+          medicalPosition: { '': 'Select', recovery_position: 'Recovery position', cpr_in_progress: 'CPR in progress', shock_position: 'Shock position', direct_pressure: 'Direct pressure / tourniquet', immobilised: 'Immobilised / splinted', self_ambulatory: 'Self-ambulatory' },
+        },
+        flags: {
+          medicalFlagUnconscious: 'Unconsciousness',
+          medicalFlagCardiacArrest: 'Cardiac arrest',
+          medicalFlagCollapse: 'Circulatory collapse',
+          medicalFlagBleeding: 'Severe bleeding',
+          medicalFlagFracture: 'Suspected fracture',
+        },
+        cards: [
+          { title: 'Unconscious', steps: ['Protect airway.', 'Recovery position if breathing.', 'Monitor responsiveness continuously.'] },
+          { title: 'Cardiac arrest', steps: ['Call for AED.', 'Start CPR immediately.', 'Keep compressions continuous.'] },
+          { title: 'Circulatory collapse', steps: ['Control heat / cold stress.', 'Lay patient flat if appropriate.', 'Prepare rapid evacuation.'] },
+          { title: 'Severe bleeding', steps: ['Direct pressure.', 'Tourniquet / packing if needed.', 'Reassess perfusion and loss.'] },
+          { title: 'Fractures', steps: ['Immobilise.', 'Check distal circulation.', 'Move only as required for safety.'] },
+        ],
+        previewTitle: 'Auto log preview',
+        previewEmpty: 'Fill the fields to build the automatic medical log entry.',
+        summaryStored: 'The summary is stored in the log automatically.',
+        resetButton: 'Reset',
+        resetTitle: 'Reset medical form',
+        createLogButton: 'Create medical log entry',
+        summaryLabels: {
+          frequency: 'Freq',
+          from: 'From',
+          to: 'To',
+          casualties: 'Casualties',
+          who: 'Who',
+          what: 'What',
+          where: 'Where',
+          priority: 'Priority',
+          consciousness: 'Consciousness',
+          breathing: 'Breathing',
+          circulation: 'Circulation',
+          bleeding: 'Bleeding',
+          injuries: 'Injuries',
+          symptoms: 'Symptoms',
+          care: 'Care',
+          redFlags: 'Red flags',
+          allergies: 'Allergies',
+          medication: 'Medication',
+          conditions: 'Conditions',
+          lastIntake: 'Last intake',
+          events: 'Events',
+          rendezvous: 'Rendezvous',
+          medTeam: 'Med team',
+          transport: 'Transport',
+          destination: 'Destination',
+          notes: 'Notes',
+        },
+      },
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1726,6 +1963,8 @@
       saveErr:         '\u26a0 Ulo\u017een\u00ed selhalo \u2013 z\u00e1loha aktivn\u00ed',
       entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
       remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
+      moveUp:          'Posunout nahoru',
+      moveDown:        'Posunout dol\u016f',
       renameType:         'P\u0159ejmenovat typ ud\u00e1losti',
       colorType:          'Zm\u011bnit barvu',
       delRow:          'Smazat z\u00e1znam',
@@ -1752,10 +1991,121 @@
       selectStatus:       'Vybrat stav',
       sprachtafelTitle:   'Tabulka Spojen\u00ed',
       natoTitle:          'Abeceda NATO',
-      medicalTitle:       'Medical emergency workflow',
+      medicalTitle:       'Zdravotnický nouzový postup',
       notesTitle:         'Poznámky',
       notesLabel:         'Obsah poznámek',
       notesPlaceholder:   'Volné poznámky…',
+      medicalUi: {
+        buttonLabel: 'Zdravotník',
+        buttonAria: 'Otevřít panel zdravotnického nouzového postupu',
+        panelTitle: 'Zdravotnický nouzový postup',
+        panelSubtitle: 'Česká dokumentace a automatický záznam do deníku',
+        sections: ['1. Rádio / přehled incidentu', '2. Stav pacienta', '3. Anamnéza / SAMPLE', '4. Evakuace / dokumentace'],
+        fieldLabels: {
+          medicalFrequency: 'Nouzová frekvence',
+          medicalReportingUnit: 'Hlásící jednotka',
+          medicalReceivingUnit: 'Přijímací stanice',
+          medicalCasualtyCount: 'Počet zraněných',
+          medicalWho: 'Kdo je zraněn?',
+          medicalWhat: 'Co se stalo?',
+          medicalWhere: 'Kde je zraněný?',
+          medicalRendezvous: 'Místo setkání',
+          medicalTeam: 'Zdravotnický tým',
+          medicalPriority: 'Priorita',
+          medicalConsciousness: 'Vědomí',
+          medicalBreathing: 'Dýchání',
+          medicalCirculation: 'Oběh',
+          medicalBleeding: 'Krvácení',
+          medicalFractures: 'Zlomeniny / poranění',
+          medicalSymptoms: 'Příznaky',
+          medicalPosition: 'Poloha / okamžitá péče',
+          medicalAllergies: 'Alergie',
+          medicalMedication: 'Léky',
+          medicalConditions: 'Onemocnění',
+          medicalLastIntake: 'Poslední perorální příjem',
+          medicalEvents: 'Události před incidentem',
+          medicalTransport: 'Plán transportu',
+          medicalDestination: 'Cíl',
+          medicalNotes: 'Poznámky k dokumentaci',
+        },
+        placeholders: {
+          medicalFrequency: 'např. 35.425 MHz',
+          medicalReportingUnit: 'Kdo volá?',
+          medicalReceivingUnit: 'Kdo přijímá provoz?',
+          medicalCasualtyCount: '1',
+          medicalWho: 'Pacient / tým / označení',
+          medicalWhat: 'Mechanismus poranění / shrnutí události',
+          medicalWhere: 'Přesná poloha / grid / orientační bod',
+          medicalRendezvous: 'Místo setkání zdravotnického týmu',
+          medicalTeam: 'Přidělení zdravotníci / sanitka',
+          medicalFractures: 'Zlomenina, popálenina, trauma, rána…',
+          medicalSymptoms: 'Bolest, dušnost, závratě, nevolnost…',
+          medicalAllergies: 'Známé alergie',
+          medicalMedication: 'Aktuální medikace',
+          medicalConditions: 'Nemoci / anamnéza',
+          medicalLastIntake: 'Jídlo / pití / čas',
+          medicalEvents: 'Příznaky před nouzí, mechanismus, časová osa…',
+          medicalTransport: 'Chůze / nosítka / sanitka / vrtulník',
+          medicalDestination: 'Ošetřovna / CCP / nemocnice',
+          medicalNotes: 'Další kroky, trend vitálních funkcí, předávací poznámky…',
+        },
+        selectOptions: {
+          medicalPriority: { '': 'Vybrat', routine: 'Rutinní', urgent: 'Urgentní', priority: 'Prioritní', immediate: 'Okamžitá' },
+          medicalConsciousness: { '': 'Vybrat', alert: 'Při vědomí', voice: 'Reaguje na hlas', pain: 'Reaguje na bolest', unresponsive: 'Bez reakce' },
+          medicalBreathing: { '': 'Vybrat', normal: 'Normální', laboured: 'Namáhavé', irregular: 'Nepravidelné', absent: 'Žádné' },
+          medicalCirculation: { '': 'Vybrat', stable: 'Stabilní', weak_pulse: 'Slabý puls', shock_signs: 'Známky šoku', no_pulse: 'Bez pulsu' },
+          medicalBleeding: { '': 'Vybrat', none: 'Žádné', controlled: 'Zastavené', moderate: 'Střední', severe: 'Silné / nekontrolované' },
+          medicalPosition: { '': 'Vybrat', recovery_position: 'Zotavovací poloha', cpr_in_progress: 'Probíhá KPR', shock_position: 'Protišoková poloha', direct_pressure: 'Přímý tlak / turniket', immobilised: 'Imobilizován / zafixován', self_ambulatory: 'Schopen chůze' },
+        },
+        flags: {
+          medicalFlagUnconscious: 'Bezvědomí',
+          medicalFlagCardiacArrest: 'Zástava srdce',
+          medicalFlagCollapse: 'Oběhový kolaps',
+          medicalFlagBleeding: 'Silné krvácení',
+          medicalFlagFracture: 'Podezření na zlomeninu',
+        },
+        cards: [
+          { title: 'Bezvědomí', steps: ['Zajistěte dýchací cesty.', 'Pokud dýchá, uložte do zotavovací polohy.', 'Průběžně sledujte reakce.'] },
+          { title: 'Zástava srdce', steps: ['Přivolejte AED.', 'Ihned zahajte KPR.', 'Udržujte nepřerušené stlačování hrudníku.'] },
+          { title: 'Oběhový kolaps', steps: ['Omezte tepelný / chladový stres.', 'Pokud je to vhodné, položte pacienta na rovinu.', 'Připravte rychlou evakuaci.'] },
+          { title: 'Silné krvácení', steps: ['Přímý tlak.', 'V případě potřeby použijte turniket / tamponádu.', 'Znovu zhodnoťte perfuzi a ztráty.'] },
+          { title: 'Zlomeniny', steps: ['Imobilizujte.', 'Zkontrolujte distální prokrvení.', 'Přesouvejte jen pokud je to nutné pro bezpečnost.'] },
+        ],
+        previewTitle: 'Náhled automatického záznamu',
+        previewEmpty: 'Vyplňte pole pro vytvoření automatického zdravotnického záznamu.',
+        summaryStored: 'Shrnutí se automaticky uloží do deníku.',
+        resetButton: 'Resetovat',
+        resetTitle: 'Resetovat zdravotnický formulář',
+        createLogButton: 'Vytvořit zdravotnický záznam',
+        summaryLabels: {
+          frequency: 'Frekvence',
+          from: 'Od',
+          to: 'Pro',
+          casualties: 'Zranění',
+          who: 'Kdo',
+          what: 'Co',
+          where: 'Kde',
+          priority: 'Priorita',
+          consciousness: 'Vědomí',
+          breathing: 'Dýchání',
+          circulation: 'Oběh',
+          bleeding: 'Krvácení',
+          injuries: 'Poranění',
+          symptoms: 'Příznaky',
+          care: 'Péče',
+          redFlags: 'Varovné znaky',
+          allergies: 'Alergie',
+          medication: 'Léky',
+          conditions: 'Onemocnění',
+          lastIntake: 'Poslední příjem',
+          events: 'Události',
+          rendezvous: 'Místo setkání',
+          medTeam: 'Zdravotnický tým',
+          transport: 'Transport',
+          destination: 'Cíl',
+          notes: 'Poznámky',
+        },
+      },
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
         ['Ende',          'Konec'],
@@ -1809,6 +2159,7 @@
     renderLagebild();
     renderLog();
     renderSprachtafel();
+    renderMedicalTranslations();
     renderMedicalPreview();
     /* Re-apply save status in new language */
     setSaveStatus(lastSaveOk);
@@ -1843,6 +2194,10 @@
   const MEDICAL_CHECK_FIELDS = [
     'medicalFlagUnconscious', 'medicalFlagCardiacArrest', 'medicalFlagCollapse',
     'medicalFlagBleeding', 'medicalFlagFracture',
+  ];
+  const MEDICAL_SELECT_FIELDS = [
+    'medicalPriority', 'medicalConsciousness', 'medicalBreathing',
+    'medicalCirculation', 'medicalBleeding', 'medicalPosition',
   ];
 
   function createDefaultMedicalState() {
@@ -2299,6 +2654,95 @@
     });
   }
 
+  function getMedicalUi() {
+    return (LANGS[lang] && LANGS[lang].medicalUi) ||
+           LANGS.de?.medicalUi ||
+           LANGS.en?.medicalUi ||
+           { fieldLabels: {}, placeholders: {}, selectOptions: {}, flags: {}, cards: [], summaryLabels: {} };
+  }
+
+  function setMedicalLabel(id, text) {
+    const label = document.querySelector(`label[for="${id}"]`);
+    if (label) label.textContent = text;
+  }
+
+  function setMedicalCheckLabel(id, text) {
+    const input = document.getElementById(id);
+    const label = input?.closest('label.medical-check');
+    if (!label || !input) return;
+    label.textContent = '';
+    label.appendChild(input);
+    label.append(' ' + text);
+  }
+
+  function setMedicalSelectOptions(id, labels) {
+    const select = document.getElementById(id);
+    if (!select || !labels) return;
+    Array.from(select.options).forEach(option => {
+      const key = option.value;
+      if (labels[key] !== undefined) option.textContent = labels[key];
+    });
+  }
+
+  function getMedicalSelectText(id, value) {
+    const labels = getMedicalUi().selectOptions?.[id];
+    return (labels && labels[value] !== undefined) ? labels[value] : value;
+  }
+
+  function renderMedicalTranslations() {
+    const ui = getMedicalUi();
+    const fieldLabels = ui.fieldLabels || {};
+    const placeholders = ui.placeholders || {};
+    const sectionHeadings = document.querySelectorAll('#medicalPanel .medical-section h4');
+    const cards = document.querySelectorAll('#medicalPanel .medical-card');
+
+    const btnMedical = document.getElementById('btnMedical');
+    if (btnMedical) {
+      btnMedical.innerHTML = `&#9877; ${escHtml(ui.buttonLabel)}`;
+      btnMedical.setAttribute('aria-label', ui.buttonAria);
+    }
+
+    const panelHeading = document.querySelector('#medicalPanel h3');
+    if (panelHeading) {
+      panelHeading.innerHTML = `<span>${escHtml(ui.panelTitle)}</span><span class="medical-subtitle">${escHtml(ui.panelSubtitle)}</span>`;
+    }
+
+    ui.sections?.forEach((title, index) => {
+      if (sectionHeadings[index]) sectionHeadings[index].textContent = title;
+    });
+
+    Object.entries(fieldLabels).forEach(([id, label]) => setMedicalLabel(id, label));
+    Object.entries(placeholders).forEach(([id, placeholder]) => {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = placeholder;
+    });
+    MEDICAL_SELECT_FIELDS.forEach(id => setMedicalSelectOptions(id, ui.selectOptions?.[id]));
+    Object.entries(ui.flags || {}).forEach(([id, label]) => setMedicalCheckLabel(id, label));
+
+    cards.forEach((card, index) => {
+      const cardUi = ui.cards?.[index];
+      if (!cardUi) return;
+      const strong = card.querySelector('strong');
+      if (strong) strong.textContent = cardUi.title;
+      const items = card.querySelectorAll('li');
+      cardUi.steps?.forEach((step, stepIndex) => {
+        if (items[stepIndex]) items[stepIndex].textContent = step;
+      });
+    });
+
+    const actionsSubtitle = document.querySelector('#medicalPanel .medical-actions .medical-subtitle');
+    if (actionsSubtitle) actionsSubtitle.textContent = ui.summaryStored;
+
+    const resetBtn = document.getElementById('btnMedicalReset');
+    if (resetBtn) {
+      resetBtn.innerHTML = `↺ ${escHtml(ui.resetButton)}`;
+      resetBtn.title = ui.resetTitle;
+    }
+
+    const logBtn = document.getElementById('btnMedicalLog');
+    if (logBtn) logBtn.textContent = ui.createLogButton;
+  }
+
   function fillMedicalForm() {
     medicalState = { ...createDefaultMedicalState(), ...(medicalState || {}) };
     MEDICAL_FIELDS.forEach(id => {
@@ -2330,40 +2774,41 @@
 
   function buildMedicalSummary() {
     syncMedicalStateFromForm();
+    const summaryLabels = getMedicalUi().summaryLabels || {};
     const risks = [
-      medicalState.medicalFlagUnconscious ? 'unconsciousness' : '',
-      medicalState.medicalFlagCardiacArrest ? 'cardiac arrest' : '',
-      medicalState.medicalFlagCollapse ? 'circulatory collapse' : '',
-      medicalState.medicalFlagBleeding ? 'severe bleeding' : '',
-      medicalState.medicalFlagFracture ? 'suspected fracture' : '',
+      medicalState.medicalFlagUnconscious ? getMedicalUi().flags?.medicalFlagUnconscious : '',
+      medicalState.medicalFlagCardiacArrest ? getMedicalUi().flags?.medicalFlagCardiacArrest : '',
+      medicalState.medicalFlagCollapse ? getMedicalUi().flags?.medicalFlagCollapse : '',
+      medicalState.medicalFlagBleeding ? getMedicalUi().flags?.medicalFlagBleeding : '',
+      medicalState.medicalFlagFracture ? getMedicalUi().flags?.medicalFlagFracture : '',
     ].filter(Boolean).join(', ');
     const parts = [
-      medicalState.medicalFrequency ? `Freq ${medicalState.medicalFrequency}` : '',
-      medicalState.medicalReportingUnit ? `From ${medicalState.medicalReportingUnit}` : '',
-      medicalState.medicalReceivingUnit ? `To ${medicalState.medicalReceivingUnit}` : '',
-      medicalState.medicalCasualtyCount ? `Casualties ${medicalState.medicalCasualtyCount}` : '',
-      medicalState.medicalWho ? `Who ${medicalState.medicalWho}` : '',
-      medicalState.medicalWhat ? `What ${medicalState.medicalWhat}` : '',
-      medicalState.medicalWhere ? `Where ${medicalState.medicalWhere}` : '',
-      medicalState.medicalPriority ? `Priority ${medicalState.medicalPriority}` : '',
-      medicalState.medicalConsciousness ? `Consciousness ${medicalState.medicalConsciousness}` : '',
-      medicalState.medicalBreathing ? `Breathing ${medicalState.medicalBreathing}` : '',
-      medicalState.medicalCirculation ? `Circulation ${medicalState.medicalCirculation}` : '',
-      medicalState.medicalBleeding ? `Bleeding ${medicalState.medicalBleeding}` : '',
-      medicalState.medicalFractures ? `Injuries ${medicalState.medicalFractures}` : '',
-      medicalState.medicalSymptoms ? `Symptoms ${medicalState.medicalSymptoms}` : '',
-      medicalState.medicalPosition ? `Care ${medicalState.medicalPosition}` : '',
-      risks ? `Red flags ${risks}` : '',
-      medicalState.medicalAllergies ? `Allergies ${medicalState.medicalAllergies}` : '',
-      medicalState.medicalMedication ? `Medication ${medicalState.medicalMedication}` : '',
-      medicalState.medicalConditions ? `Conditions ${medicalState.medicalConditions}` : '',
-      medicalState.medicalLastIntake ? `Last intake ${medicalState.medicalLastIntake}` : '',
-      medicalState.medicalEvents ? `Events ${medicalState.medicalEvents}` : '',
-      medicalState.medicalRendezvous ? `Rendezvous ${medicalState.medicalRendezvous}` : '',
-      medicalState.medicalTeam ? `Med team ${medicalState.medicalTeam}` : '',
-      medicalState.medicalTransport ? `Transport ${medicalState.medicalTransport}` : '',
-      medicalState.medicalDestination ? `Destination ${medicalState.medicalDestination}` : '',
-      medicalState.medicalNotes ? `Notes ${medicalState.medicalNotes}` : '',
+      medicalState.medicalFrequency ? `${summaryLabels.frequency} ${medicalState.medicalFrequency}` : '',
+      medicalState.medicalReportingUnit ? `${summaryLabels.from} ${medicalState.medicalReportingUnit}` : '',
+      medicalState.medicalReceivingUnit ? `${summaryLabels.to} ${medicalState.medicalReceivingUnit}` : '',
+      medicalState.medicalCasualtyCount ? `${summaryLabels.casualties} ${medicalState.medicalCasualtyCount}` : '',
+      medicalState.medicalWho ? `${summaryLabels.who} ${medicalState.medicalWho}` : '',
+      medicalState.medicalWhat ? `${summaryLabels.what} ${medicalState.medicalWhat}` : '',
+      medicalState.medicalWhere ? `${summaryLabels.where} ${medicalState.medicalWhere}` : '',
+      medicalState.medicalPriority ? `${summaryLabels.priority} ${getMedicalSelectText('medicalPriority', medicalState.medicalPriority)}` : '',
+      medicalState.medicalConsciousness ? `${summaryLabels.consciousness} ${getMedicalSelectText('medicalConsciousness', medicalState.medicalConsciousness)}` : '',
+      medicalState.medicalBreathing ? `${summaryLabels.breathing} ${getMedicalSelectText('medicalBreathing', medicalState.medicalBreathing)}` : '',
+      medicalState.medicalCirculation ? `${summaryLabels.circulation} ${getMedicalSelectText('medicalCirculation', medicalState.medicalCirculation)}` : '',
+      medicalState.medicalBleeding ? `${summaryLabels.bleeding} ${getMedicalSelectText('medicalBleeding', medicalState.medicalBleeding)}` : '',
+      medicalState.medicalFractures ? `${summaryLabels.injuries} ${medicalState.medicalFractures}` : '',
+      medicalState.medicalSymptoms ? `${summaryLabels.symptoms} ${medicalState.medicalSymptoms}` : '',
+      medicalState.medicalPosition ? `${summaryLabels.care} ${getMedicalSelectText('medicalPosition', medicalState.medicalPosition)}` : '',
+      risks ? `${summaryLabels.redFlags} ${risks}` : '',
+      medicalState.medicalAllergies ? `${summaryLabels.allergies} ${medicalState.medicalAllergies}` : '',
+      medicalState.medicalMedication ? `${summaryLabels.medication} ${medicalState.medicalMedication}` : '',
+      medicalState.medicalConditions ? `${summaryLabels.conditions} ${medicalState.medicalConditions}` : '',
+      medicalState.medicalLastIntake ? `${summaryLabels.lastIntake} ${medicalState.medicalLastIntake}` : '',
+      medicalState.medicalEvents ? `${summaryLabels.events} ${medicalState.medicalEvents}` : '',
+      medicalState.medicalRendezvous ? `${summaryLabels.rendezvous} ${medicalState.medicalRendezvous}` : '',
+      medicalState.medicalTeam ? `${summaryLabels.medTeam} ${medicalState.medicalTeam}` : '',
+      medicalState.medicalTransport ? `${summaryLabels.transport} ${medicalState.medicalTransport}` : '',
+      medicalState.medicalDestination ? `${summaryLabels.destination} ${medicalState.medicalDestination}` : '',
+      medicalState.medicalNotes ? `${summaryLabels.notes} ${medicalState.medicalNotes}` : '',
     ].filter(Boolean);
     return parts.join(' | ');
   }
@@ -2371,8 +2816,9 @@
   function renderMedicalPreview() {
     const preview = document.getElementById('medicalPreview');
     if (!preview) return;
+    const ui = getMedicalUi();
     const summary = buildMedicalSummary();
-    preview.innerHTML = `<strong>Auto log preview</strong> ${escHtml(summary || 'Fill the fields to build the automatic medical log entry.')}`;
+    preview.innerHTML = `<strong>${escHtml(ui.previewTitle)}</strong> ${escHtml(summary || ui.previewEmpty)}`;
   }
 
   function resetMedicalForm() {
@@ -2388,7 +2834,7 @@
     }
     log.push({
       zeit: nowTime(),
-      von: medicalState.medicalReportingUnit || 'Medical',
+      von: medicalState.medicalReportingUnit || tType('Medical'),
       an: medicalState.medicalReceivingUnit || '',
       art: 'Medical',
       inhalt: summary,
@@ -2484,7 +2930,11 @@
           `${escHtml(getStatusLabel(status))}` +
         `</button>` +
         `<span class="unit-name">${escHtml(u)}</span>` +
-        `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
+        `<div class="unit-actions">` +
+          `<button class="btn-move-unit" data-i="${i}" data-dir="-1" title="${escHtml(t('moveUp'))}"${i === 0 ? ' disabled' : ''}>↑</button>` +
+          `<button class="btn-move-unit" data-i="${i}" data-dir="1" title="${escHtml(t('moveDown'))}"${i === units.length - 1 ? ' disabled' : ''}>↓</button>` +
+          `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>` +
+        `</div>`;
       list.appendChild(li);
     });
 
@@ -2714,7 +3164,7 @@
         <td class="td-zeit">${escHtml(e.zeit)}</td>
         <td class="td-von">${escHtml(e.von)}</td>
         <td class="td-an">${escHtml(e.an)}</td>
-        <td class="td-art"><span class="badge ${badgeClass(e.art)}"${badgeStyle}>${escHtml(e.art)}</span></td>
+        <td class="td-art"><span class="badge ${badgeClass(e.art)}"${badgeStyle}>${escHtml(tType(e.art))}</span></td>
         <td class="td-inhalt">${escHtml(e.inhalt)}</td>
         <td class="td-del"><button class="btn-del-row" data-i="${i}" title="${escHtml(t('delRow'))}">✕</button></td>
       `;
@@ -2741,6 +3191,14 @@
     units.push(name);
     unitStatuses[name] = getEffectiveStatuses()[0] || 'active';
     input.value = '';
+    save(); renderUnits(); renderLagebild();
+  }
+
+  function moveUnit(fromIndex, direction) {
+    const toIndex = fromIndex + direction;
+    if (fromIndex < 0 || fromIndex >= units.length) return;
+    if (toIndex < 0 || toIndex >= units.length) return;
+    [units[fromIndex], units[toIndex]] = [units[toIndex], units[fromIndex]];
     save(); renderUnits(); renderLagebild();
   }
 
@@ -3061,6 +3519,12 @@
     /* Status badge click – open status selection menu */
     const statusBtn = e.target.closest('.unit-status');
     if (statusBtn) { openStatusMenu(statusBtn.dataset.unit, statusBtn); return; }
+    /* Move button */
+    const moveBtn = e.target.closest('.btn-move-unit');
+    if (moveBtn) {
+      moveUnit(parseInt(moveBtn.dataset.i, 10), parseInt(moveBtn.dataset.dir, 10));
+      return;
+    }
     /* Delete button */
     const delBtn = e.target.closest('.btn-del-unit');
     if (!delBtn) return;
