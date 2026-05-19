@@ -103,6 +103,143 @@
       display: none;
     }
     .sprachtafel-panel.open { display: block; }
+    .medical-panel {
+      width: min(820px, calc(100vw - 32px));
+      max-width: 100%;
+    }
+    .medical-panel h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .medical-subtitle {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .medical-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .medical-section {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+      background: #141414;
+    }
+    .medical-section h4 {
+      margin: 0 0 8px;
+    }
+    .medical-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .medical-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .medical-field label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .medical-field input,
+    .medical-field select,
+    .medical-field textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      font-family: inherit;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .medical-field input:focus,
+    .medical-field select:focus,
+    .medical-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .medical-field textarea {
+      resize: vertical;
+      min-height: 64px;
+    }
+    .medical-field.span-2 {
+      grid-column: span 2;
+    }
+    .medical-checks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .medical-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--row-even);
+      font-size: 11px;
+      color: var(--text);
+    }
+    .medical-check input { accent-color: var(--accent); }
+    .medical-guidance {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .medical-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--row-even);
+      padding: 8px;
+    }
+    .medical-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .medical-card ul {
+      padding-left: 16px;
+      color: var(--text-dim);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .medical-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .medical-preview {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #101010;
+      padding: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+    }
+    .medical-preview strong {
+      display: block;
+      color: var(--accent);
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
     .sprachtafel-panel h3 {
       font-size: 11px;
       letter-spacing: 2px;
@@ -766,6 +903,7 @@
     .badge-feind       { background: #4a1a1a; color: #e87a7a; }
     .badge-meldung     { background: #3a3010; color: #d4b868; }
     .badge-sonstiges   { background: #2a2a2a; color: #aaaaaa; }
+    .badge-medical     { background: #2a1e36; color: #d7afff; }
 
     .btn-del-row {
       background: none;
@@ -808,6 +946,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
     <button class="sprachtafel-btn" id="btnNato" data-i18n-title="natoTitle" title="NATO Alphabet">&#129517; NATO</button>
+    <button class="sprachtafel-btn" id="btnMedical" data-i18n-title="medicalTitle" title="Medical emergency workflow" aria-label="Open medical emergency workflow panel">&#9877; Medical</button>
     <button class="sprachtafel-btn" id="btnSitrep" title="SITREP">&#128203; SITREP</button>
     <button class="sprachtafel-btn" id="btnMap" title="Karte / MAP">&#128506; MAP</button>
     <div style="text-align:right;">
@@ -864,6 +1003,216 @@
 <div class="sprachtafel-panel" id="mapPanel" style="max-width:90vw;">
   <h3>Karte / MAP</h3>
   <img src="KARTE.jpg" alt="Karte" style="max-width:100%;max-height:calc(100vh - 120px);display:block;"/>
+</div>
+
+<div class="sprachtafel-panel medical-panel" id="medicalPanel">
+  <h3>
+    <span>Medical Emergency Workflow</span>
+    <span class="medical-subtitle">English documentation &amp; auto log entry</span>
+  </h3>
+  <div class="medical-form">
+    <div class="medical-section">
+      <h4>1. Radio / Incident Overview</h4>
+      <div class="medical-grid">
+        <div class="medical-field">
+          <label for="medicalFrequency">Emergency frequency</label>
+          <input type="text" id="medicalFrequency" placeholder="e.g. 35.425 MHz" maxlength="40" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalReportingUnit">Reporting unit</label>
+          <input type="text" id="medicalReportingUnit" placeholder="Who is calling?" maxlength="60" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalReceivingUnit">Receiving station</label>
+          <input type="text" id="medicalReceivingUnit" placeholder="Who receives the traffic?" maxlength="60" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalCasualtyCount">Number of casualties</label>
+          <input type="number" id="medicalCasualtyCount" min="1" max="99" placeholder="1" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalWho">Who is injured?</label>
+          <input type="text" id="medicalWho" placeholder="Patient / team / identifier" maxlength="80" />
+        </div>
+        <div class="medical-field span-2">
+          <label for="medicalWhat">What happened?</label>
+          <input type="text" id="medicalWhat" placeholder="Mechanism of injury / incident summary" maxlength="140" />
+        </div>
+        <div class="medical-field span-2">
+          <label for="medicalWhere">Where is the casualty?</label>
+          <input type="text" id="medicalWhere" placeholder="Exact location / grid / landmark" maxlength="140" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalRendezvous">Rendezvous point</label>
+          <input type="text" id="medicalRendezvous" placeholder="Meeting point for the med team" maxlength="80" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalTeam">Medical team</label>
+          <input type="text" id="medicalTeam" placeholder="Assigned medics / ambulance" maxlength="80" />
+        </div>
+      </div>
+    </div>
+
+    <div class="medical-section">
+      <h4>2. Patient Assessment</h4>
+      <div class="medical-grid">
+        <div class="medical-field">
+          <label for="medicalPriority">Priority</label>
+          <select id="medicalPriority">
+            <option value="">Select</option>
+            <option>Routine</option>
+            <option>Urgent</option>
+            <option>Priority</option>
+            <option>Immediate</option>
+          </select>
+        </div>
+        <div class="medical-field">
+          <label for="medicalConsciousness">Consciousness</label>
+          <select id="medicalConsciousness">
+            <option value="">Select</option>
+            <option>Alert</option>
+            <option>Responds to voice</option>
+            <option>Responds to pain</option>
+            <option>Unresponsive</option>
+          </select>
+        </div>
+        <div class="medical-field">
+          <label for="medicalBreathing">Breathing</label>
+          <select id="medicalBreathing">
+            <option value="">Select</option>
+            <option>Normal</option>
+            <option>Laboured</option>
+            <option>Irregular</option>
+            <option>Absent</option>
+          </select>
+        </div>
+        <div class="medical-field">
+          <label for="medicalCirculation">Circulation</label>
+          <select id="medicalCirculation">
+            <option value="">Select</option>
+            <option>Stable</option>
+            <option>Weak pulse</option>
+            <option>Shock signs</option>
+            <option>No pulse</option>
+          </select>
+        </div>
+        <div class="medical-field">
+          <label for="medicalBleeding">Bleeding</label>
+          <select id="medicalBleeding">
+            <option value="">Select</option>
+            <option>None</option>
+            <option>Controlled</option>
+            <option>Moderate</option>
+            <option>Severe / uncontrolled</option>
+          </select>
+        </div>
+        <div class="medical-field">
+          <label for="medicalFractures">Fractures / injuries</label>
+          <input type="text" id="medicalFractures" placeholder="Fracture, burn, trauma, wound..." maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalSymptoms">Symptoms</label>
+          <input type="text" id="medicalSymptoms" placeholder="Pain, dyspnoea, dizziness, nausea..." maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalPosition">Position / immediate care</label>
+          <select id="medicalPosition">
+            <option value="">Select</option>
+            <option>Recovery position</option>
+            <option>CPR in progress</option>
+            <option>Shock position</option>
+            <option>Direct pressure / tourniquet</option>
+            <option>Immobilised / splinted</option>
+            <option>Self-ambulatory</option>
+          </select>
+        </div>
+      </div>
+      <div class="medical-checks" style="margin-top:8px;">
+        <label class="medical-check"><input type="checkbox" id="medicalFlagUnconscious" /> Unconsciousness</label>
+        <label class="medical-check"><input type="checkbox" id="medicalFlagCardiacArrest" /> Cardiac arrest</label>
+        <label class="medical-check"><input type="checkbox" id="medicalFlagCollapse" /> Circulatory collapse</label>
+        <label class="medical-check"><input type="checkbox" id="medicalFlagBleeding" /> Severe bleeding</label>
+        <label class="medical-check"><input type="checkbox" id="medicalFlagFracture" /> Suspected fracture</label>
+      </div>
+    </div>
+
+    <div class="medical-section">
+      <h4>3. Medical History / SAMPLE</h4>
+      <div class="medical-grid">
+        <div class="medical-field">
+          <label for="medicalAllergies">Allergies</label>
+          <input type="text" id="medicalAllergies" placeholder="Known allergies" maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalMedication">Medication</label>
+          <input type="text" id="medicalMedication" placeholder="Current medication" maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalConditions">Medical conditions</label>
+          <input type="text" id="medicalConditions" placeholder="Diseases / history" maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalLastIntake">Last oral intake</label>
+          <input type="text" id="medicalLastIntake" placeholder="Food / drink / time" maxlength="80" />
+        </div>
+        <div class="medical-field span-2">
+          <label for="medicalEvents">Events before incident</label>
+          <textarea id="medicalEvents" placeholder="Symptoms before the emergency, mechanism, timeline..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="medical-section">
+      <h4>4. Evacuation / Documentation</h4>
+      <div class="medical-grid">
+        <div class="medical-field">
+          <label for="medicalTransport">Transport plan</label>
+          <input type="text" id="medicalTransport" placeholder="Walking / stretcher / ambulance / helicopter" maxlength="120" />
+        </div>
+        <div class="medical-field">
+          <label for="medicalDestination">Destination</label>
+          <input type="text" id="medicalDestination" placeholder="Aid station / CCP / hospital" maxlength="120" />
+        </div>
+        <div class="medical-field span-2">
+          <label for="medicalNotes">Documentation notes</label>
+          <textarea id="medicalNotes" placeholder="Further actions, vital trends, handover notes..."></textarea>
+        </div>
+      </div>
+      <div class="medical-guidance" style="margin-top:8px;">
+        <div class="medical-card">
+          <strong>Unconscious</strong>
+          <ul><li>Protect airway.</li><li>Recovery position if breathing.</li><li>Monitor responsiveness continuously.</li></ul>
+        </div>
+        <div class="medical-card">
+          <strong>Cardiac arrest</strong>
+          <ul><li>Call for AED.</li><li>Start CPR immediately.</li><li>Keep compressions continuous.</li></ul>
+        </div>
+        <div class="medical-card">
+          <strong>Circulatory collapse</strong>
+          <ul><li>Control heat / cold stress.</li><li>Lay patient flat if appropriate.</li><li>Prepare rapid evacuation.</li></ul>
+        </div>
+        <div class="medical-card">
+          <strong>Severe bleeding</strong>
+          <ul><li>Direct pressure.</li><li>Tourniquet / packing if needed.</li><li>Reassess perfusion and loss.</li></ul>
+        </div>
+        <div class="medical-card">
+          <strong>Fractures</strong>
+          <ul><li>Immobilise.</li><li>Check distal circulation.</li><li>Move only as required for safety.</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="medical-section">
+      <div class="medical-preview" id="medicalPreview"><strong>Auto log preview</strong> Fill the fields to build the automatic medical log entry.</div>
+      <div class="medical-actions" style="margin-top:10px;">
+        <span class="medical-subtitle">The summary is stored in the log automatically.</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-reset" id="btnMedicalReset" type="button" title="Reset medical form">↺ Reset</button>
+          <button class="btn-log" id="btnMedicalLog" type="button">Create medical log entry</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="layout">
@@ -1046,6 +1395,7 @@
       selectStatus:       'Status w\u00e4hlen',
       sprachtafelTitle:   'Sprachtafel Funk',
       natoTitle:          'NATO Alphabet',
+      medicalTitle:       'Medical-Notfallablauf',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1118,6 +1468,7 @@
       selectStatus:       'Select status',
       sprachtafelTitle:   'Radio Communication Table',
       natoTitle:          'NATO Alphabet',
+      medicalTitle:       'Medical emergency workflow',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1190,6 +1541,7 @@
       selectStatus:       'Vybrat stav',
       sprachtafelTitle:   'Tabulka Spojen\u00ed',
       natoTitle:          'Abeceda NATO',
+      medicalTitle:       'Medical emergency workflow',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
         ['Ende',          'Konec'],
@@ -1243,6 +1595,7 @@
     renderLagebild();
     renderLog();
     renderSprachtafel();
+    renderMedicalPreview();
     /* Re-apply save status in new language */
     setSaveStatus(lastSaveOk);
   }
@@ -1262,7 +1615,57 @@
   let builtinLabels   = {};  /* { id: customLabel } – overrides i18n labels for built-in statuses */
   let builtinColors   = {};  /* { id: {bg,color,border} } – overrides default colors for built-in statuses */
   let typeColors      = {};  /* { typeName: {bg,color,border} } – custom colors for event types */
+  let medicalState    = null;
   const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
+  const MEDICAL_FIELDS = [
+    'medicalFrequency', 'medicalReportingUnit', 'medicalReceivingUnit', 'medicalCasualtyCount',
+    'medicalWho', 'medicalWhat', 'medicalWhere', 'medicalRendezvous', 'medicalTeam',
+    'medicalPriority', 'medicalConsciousness', 'medicalBreathing', 'medicalCirculation',
+    'medicalBleeding', 'medicalFractures', 'medicalSymptoms', 'medicalPosition',
+    'medicalAllergies', 'medicalMedication', 'medicalConditions', 'medicalLastIntake',
+    'medicalEvents', 'medicalTransport', 'medicalDestination', 'medicalNotes',
+  ];
+  const MEDICAL_CHECK_FIELDS = [
+    'medicalFlagUnconscious', 'medicalFlagCardiacArrest', 'medicalFlagCollapse',
+    'medicalFlagBleeding', 'medicalFlagFracture',
+  ];
+
+  function createDefaultMedicalState() {
+    return {
+      medicalFrequency: '',
+      medicalReportingUnit: '',
+      medicalReceivingUnit: '',
+      medicalCasualtyCount: '',
+      medicalWho: '',
+      medicalWhat: '',
+      medicalWhere: '',
+      medicalRendezvous: '',
+      medicalTeam: '',
+      medicalPriority: '',
+      medicalConsciousness: '',
+      medicalBreathing: '',
+      medicalCirculation: '',
+      medicalBleeding: '',
+      medicalFractures: '',
+      medicalSymptoms: '',
+      medicalPosition: '',
+      medicalAllergies: '',
+      medicalMedication: '',
+      medicalConditions: '',
+      medicalLastIntake: '',
+      medicalEvents: '',
+      medicalTransport: '',
+      medicalDestination: '',
+      medicalNotes: '',
+      medicalFlagUnconscious: false,
+      medicalFlagCardiacArrest: false,
+      medicalFlagCollapse: false,
+      medicalFlagBleeding: false,
+      medicalFlagFracture: false,
+    };
+  }
+
+  medicalState = createDefaultMedicalState();
 
   /* Default colours for the four built-in statuses */
   const BUILTIN_DEFAULT_COLORS = {
@@ -1279,6 +1682,7 @@
     'Feindmeldung':   { bg: '#4a1a1a', color: '#e87a7a', border: '#7a2a2a' },
     'Meldung':        { bg: '#3a3010', color: '#d4b868', border: '#6a5a20' },
     'Sonstiges':      { bg: '#2a2a2a', color: '#aaaaaa', border: '#444444' },
+    'Medical':        { bg: '#2a1e36', color: '#d7afff', border: '#6e49a8' },
   };
   const DEFAULT_TYPE_COLOR = { bg: '#2a2a2a', color: '#aaaaaa', border: '#444444' };
 
@@ -1550,6 +1954,7 @@
       builtinLabels   = (d.builtinLabels  && typeof d.builtinLabels  === 'object') ? d.builtinLabels  : {};
       builtinColors   = (d.builtinColors  && typeof d.builtinColors  === 'object') ? d.builtinColors  : {};
       typeColors      = (d.typeColors     && typeof d.typeColors     === 'object') ? d.typeColors     : {};
+      medicalState    = createDefaultMedicalState();
       ensureUnitStatuses();
       if (d.lastSaved) setSaveStatus(true);
     }
@@ -1604,6 +2009,7 @@
       const p = JSON.parse(localStorage.getItem('tsl_typeColors'));
       typeColors = (p && typeof p === 'object') ? p : {};
     } catch(e) { typeColors = {}; }
+    medicalState = createDefaultMedicalState();
     ensureUnitStatuses();
     /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
@@ -1649,16 +2055,118 @@
     ).join('');
   }
 
+  function closeUtilityPanels(except = '') {
+    ['sprachtafel', 'nato', 'medical', 'sitrep', 'map'].forEach(name => {
+      const panelId = name + 'Panel';
+      const btnId = 'btn' + name.charAt(0).toUpperCase() + name.slice(1);
+      if (panelId === except) return;
+      document.getElementById(panelId)?.classList.remove('open');
+      document.getElementById(btnId)?.classList.remove('active');
+    });
+  }
+
+  function syncMedicalStateFromForm() {
+    MEDICAL_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) medicalState[id] = el.value;
+    });
+    MEDICAL_CHECK_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) medicalState[id] = !!el.checked;
+    });
+  }
+
+  function fillMedicalForm() {
+    medicalState = { ...createDefaultMedicalState(), ...(medicalState || {}) };
+    MEDICAL_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = medicalState[id] || '';
+    });
+    MEDICAL_CHECK_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!medicalState[id];
+    });
+    renderMedicalPreview();
+  }
+
+  function scheduleMedicalSave() {
+    syncMedicalStateFromForm();
+    renderMedicalPreview();
+  }
+
+  function buildMedicalSummary() {
+    syncMedicalStateFromForm();
+    const risks = [
+      medicalState.medicalFlagUnconscious ? 'unconsciousness' : '',
+      medicalState.medicalFlagCardiacArrest ? 'cardiac arrest' : '',
+      medicalState.medicalFlagCollapse ? 'circulatory collapse' : '',
+      medicalState.medicalFlagBleeding ? 'severe bleeding' : '',
+      medicalState.medicalFlagFracture ? 'suspected fracture' : '',
+    ].filter(Boolean).join(', ');
+    const parts = [
+      medicalState.medicalFrequency ? `Freq ${medicalState.medicalFrequency}` : '',
+      medicalState.medicalReportingUnit ? `From ${medicalState.medicalReportingUnit}` : '',
+      medicalState.medicalReceivingUnit ? `To ${medicalState.medicalReceivingUnit}` : '',
+      medicalState.medicalCasualtyCount ? `Casualties ${medicalState.medicalCasualtyCount}` : '',
+      medicalState.medicalWho ? `Who ${medicalState.medicalWho}` : '',
+      medicalState.medicalWhat ? `What ${medicalState.medicalWhat}` : '',
+      medicalState.medicalWhere ? `Where ${medicalState.medicalWhere}` : '',
+      medicalState.medicalPriority ? `Priority ${medicalState.medicalPriority}` : '',
+      medicalState.medicalConsciousness ? `Consciousness ${medicalState.medicalConsciousness}` : '',
+      medicalState.medicalBreathing ? `Breathing ${medicalState.medicalBreathing}` : '',
+      medicalState.medicalCirculation ? `Circulation ${medicalState.medicalCirculation}` : '',
+      medicalState.medicalBleeding ? `Bleeding ${medicalState.medicalBleeding}` : '',
+      medicalState.medicalFractures ? `Injuries ${medicalState.medicalFractures}` : '',
+      medicalState.medicalSymptoms ? `Symptoms ${medicalState.medicalSymptoms}` : '',
+      medicalState.medicalPosition ? `Care ${medicalState.medicalPosition}` : '',
+      risks ? `Red flags ${risks}` : '',
+      medicalState.medicalAllergies ? `Allergies ${medicalState.medicalAllergies}` : '',
+      medicalState.medicalMedication ? `Medication ${medicalState.medicalMedication}` : '',
+      medicalState.medicalConditions ? `Conditions ${medicalState.medicalConditions}` : '',
+      medicalState.medicalLastIntake ? `Last intake ${medicalState.medicalLastIntake}` : '',
+      medicalState.medicalEvents ? `Events ${medicalState.medicalEvents}` : '',
+      medicalState.medicalRendezvous ? `Rendezvous ${medicalState.medicalRendezvous}` : '',
+      medicalState.medicalTeam ? `Med team ${medicalState.medicalTeam}` : '',
+      medicalState.medicalTransport ? `Transport ${medicalState.medicalTransport}` : '',
+      medicalState.medicalDestination ? `Destination ${medicalState.medicalDestination}` : '',
+      medicalState.medicalNotes ? `Notes ${medicalState.medicalNotes}` : '',
+    ].filter(Boolean);
+    return parts.join(' | ');
+  }
+
+  function renderMedicalPreview() {
+    const preview = document.getElementById('medicalPreview');
+    if (!preview) return;
+    const summary = buildMedicalSummary();
+    preview.innerHTML = `<strong>Auto log preview</strong> ${escHtml(summary || 'Fill the fields to build the automatic medical log entry.')}`;
+  }
+
+  function resetMedicalForm() {
+    medicalState = createDefaultMedicalState();
+    fillMedicalForm();
+  }
+
+  function addMedicalLogEntry() {
+    const summary = buildMedicalSummary();
+    if (!summary) {
+      document.getElementById('medicalWho')?.focus();
+      return;
+    }
+    log.push({
+      zeit: nowTime(),
+      von: medicalState.medicalReportingUnit || 'Medical',
+      an: medicalState.medicalReceivingUnit || '',
+      art: 'Medical',
+      inhalt: summary,
+    });
+    save();
+    renderLog(true);
+  }
+
   document.getElementById('btnSprachtafel')?.addEventListener('click', function(e) {
     e.stopPropagation();
     const panel     = document.getElementById('sprachtafelPanel');
-    const natoPanel = document.getElementById('natoPanel');
-    const natoBtn   = document.getElementById('btnNato');
-    /* Close other panels if open */
-    natoPanel.classList.remove('open');
-    if (natoBtn) natoBtn.classList.remove('active');
-    ['sitrepPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
-    ['btnSitrep','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    closeUtilityPanels('sprachtafelPanel');
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
     if (isOpen) renderSprachtafel();
@@ -1667,21 +2175,23 @@
   document.getElementById('btnNato')?.addEventListener('click', function(e) {
     e.stopPropagation();
     const natoPanel  = document.getElementById('natoPanel');
-    const funkPanel  = document.getElementById('sprachtafelPanel');
-    const funkBtn    = document.getElementById('btnSprachtafel');
-    /* Close other panels if open */
-    funkPanel.classList.remove('open');
-    if (funkBtn) funkBtn.classList.remove('active');
-    ['sitrepPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
-    ['btnSitrep','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    closeUtilityPanels('natoPanel');
     const isOpen = natoPanel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
   });
 
+  document.getElementById('btnMedical')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const panel = document.getElementById('medicalPanel');
+    closeUtilityPanels('medicalPanel');
+    const isOpen = panel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
+    if (isOpen) fillMedicalForm();
+  });
+
   document.getElementById('btnSitrep')?.addEventListener('click', function(e) {
     e.stopPropagation();
-    ['sprachtafelPanel','natoPanel','mapPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
-    ['btnSprachtafel','btnNato','btnMap'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    closeUtilityPanels('sitrepPanel');
     const panel = document.getElementById('sitrepPanel');
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
@@ -1689,46 +2199,29 @@
 
   document.getElementById('btnMap')?.addEventListener('click', function(e) {
     e.stopPropagation();
-    ['sprachtafelPanel','natoPanel','sitrepPanel'].forEach(id => document.getElementById(id)?.classList.remove('open'));
-    ['btnSprachtafel','btnNato','btnSitrep'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+    closeUtilityPanels('mapPanel');
     const panel = document.getElementById('mapPanel');
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
   });
 
   document.addEventListener('click', function(e) {
-    const panel = document.getElementById('sprachtafelPanel');
-    const btn   = document.getElementById('btnSprachtafel');
-    if (panel && panel.classList.contains('open') &&
-        !panel.contains(e.target) &&
-        e.target.id !== 'btnSprachtafel') {
-      panel.classList.remove('open');
-      if (btn) btn.classList.remove('active');
-    }
-    const natoPanel = document.getElementById('natoPanel');
-    const natoBtn   = document.getElementById('btnNato');
-    if (natoPanel && natoPanel.classList.contains('open') &&
-        !natoPanel.contains(e.target) &&
-        e.target.id !== 'btnNato') {
-      natoPanel.classList.remove('open');
-      if (natoBtn) natoBtn.classList.remove('active');
-    }
-    const sitrepPanel = document.getElementById('sitrepPanel');
-    const sitrepBtn   = document.getElementById('btnSitrep');
-    if (sitrepPanel && sitrepPanel.classList.contains('open') &&
-        !sitrepPanel.contains(e.target) &&
-        e.target.id !== 'btnSitrep') {
-      sitrepPanel.classList.remove('open');
-      if (sitrepBtn) sitrepBtn.classList.remove('active');
-    }
-    const mapPanel = document.getElementById('mapPanel');
-    const mapBtn   = document.getElementById('btnMap');
-    if (mapPanel && mapPanel.classList.contains('open') &&
-        !mapPanel.contains(e.target) &&
-        e.target.id !== 'btnMap') {
-      mapPanel.classList.remove('open');
-      if (mapBtn) mapBtn.classList.remove('active');
-    }
+    [
+      ['sprachtafelPanel', 'btnSprachtafel'],
+      ['natoPanel', 'btnNato'],
+      ['medicalPanel', 'btnMedical'],
+      ['sitrepPanel', 'btnSitrep'],
+      ['mapPanel', 'btnMap'],
+    ].forEach(([panelId, btnId]) => {
+      const panel = document.getElementById(panelId);
+      const btn   = document.getElementById(btnId);
+      if (panel && panel.classList.contains('open') &&
+          !panel.contains(e.target) &&
+          !btn?.contains(e.target)) {
+        panel.classList.remove('open');
+        btn?.classList.remove('active');
+      }
+    });
   });
 
   /* ── Render units ── */
@@ -1941,6 +2434,7 @@
       'Meldung':        'badge-meldung',
       'Sonstiges':      'badge-sonstiges',
       'Statusmeldung':  'badge-statusmeldung',
+      'Medical':        'badge-medical',
     };
     return map[art] || 'badge-sonstiges';
   }
@@ -2433,9 +2927,19 @@
   });
 
   document.getElementById('btnExport').addEventListener('click', exportCSV);
+  MEDICAL_FIELDS.forEach(id => {
+    document.getElementById(id)?.addEventListener('input', scheduleMedicalSave);
+    document.getElementById(id)?.addEventListener('change', scheduleMedicalSave);
+  });
+  MEDICAL_CHECK_FIELDS.forEach(id => {
+    document.getElementById(id)?.addEventListener('change', scheduleMedicalSave);
+  });
+  document.getElementById('btnMedicalReset')?.addEventListener('click', resetMedicalForm);
+  document.getElementById('btnMedicalLog')?.addEventListener('click', addMedicalLogEntry);
 
   /* ── Init ── */
   load().then(() => {
+    fillMedicalForm();
     applyLang();  /* sets lang, renders all panels, applies translations */
   });
   /* ── Sidebar toggle ── */
