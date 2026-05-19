@@ -1205,7 +1205,7 @@
 <div class="sprachtafel-panel notes-panel" id="notesPanel">
   <h3 data-i18n="notesTitle">Notizen</h3>
   <div class="notes-field">
-    <label for="notesInput" data-i18n="notesLabel">Notizen</label>
+    <label for="notesInput" data-i18n="notesLabel">Notizinhalt</label>
     <textarea id="notesInput" data-i18n-ph="notesPlaceholder" placeholder="Freie Notizen..."></textarea>
   </div>
 </div>
@@ -1602,7 +1602,7 @@
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical-Notfallablauf',
       notesTitle:         'Notizen',
-      notesLabel:         'Notizen',
+      notesLabel:         'Notizinhalt',
       notesPlaceholder:   'Freie Notizen…',
       sprachtafel: [
         ['Kommen',        'Over'],
@@ -1678,7 +1678,7 @@
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical emergency workflow',
       notesTitle:         'Notes',
-      notesLabel:         'Notes',
+      notesLabel:         'Notes content',
       notesPlaceholder:   'Free notes…',
       sprachtafel: [
         ['Kommen',        'Over'],
@@ -1754,7 +1754,7 @@
       natoTitle:          'Abeceda NATO',
       medicalTitle:       'Medical emergency workflow',
       notesTitle:         'Poznámky',
-      notesLabel:         'Poznámky',
+      notesLabel:         'Obsah poznámek',
       notesPlaceholder:   'Volné poznámky…',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
@@ -2312,7 +2312,7 @@
     renderMedicalPreview();
   }
 
-  function fillNotesForm() {
+  function fillNotesInput() {
     const el = document.getElementById('notesInput');
     if (el) el.value = notesText || '';
   }
@@ -2445,7 +2445,7 @@
     const panel = document.getElementById('notesPanel');
     const isOpen = panel.classList.toggle('open');
     this.classList.toggle('active', isOpen);
-    if (isOpen) fillNotesForm();
+    if (isOpen) fillNotesInput();
   });
 
   document.addEventListener('click', function(e) {
@@ -3185,7 +3185,7 @@
 
   /* ── Init ── */
   load().then(() => {
-    fillNotesForm();
+    fillNotesInput();
     fillMedicalForm();
     applyLang();  /* sets lang, renders all panels, applies translations */
   });
