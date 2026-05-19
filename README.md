@@ -4,7 +4,7 @@ Leichtgewichtiges Lagetagebuch für taktische Lagen.
 
 ## Funktion
 
-- **Einheitenliste** (Sidebar): Einheiten hinzufügen / entfernen; werden automatisch in den Dropdowns verfügbar
+- **Einheitenliste** (Sidebar): Einheiten hinzufügen / entfernen / verschieben; werden automatisch in den Dropdowns verfügbar
 - **Neuer Eintrag**: Zeit (automatisch), Von, An, Art, Inhalt — mit Enter oder Schaltfläche eintragen
 - **Arten**: Anforderung · Truppenmeldung · Feindmeldung · Meldung · Sonstiges
 - **Lagetagebuch**: fortlaufend nummeriert, farbige Badges pro Art, scrollbar

@@ -494,6 +494,12 @@
     }
     .unit-list li:hover { background: var(--panel-2); border-color: var(--border); }
     .unit-list li .unit-name { flex: 1; }
+    .unit-list li .unit-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .unit-list li .btn-move-unit,
     .unit-list li .btn-del-unit {
       background: none;
       border: none;
@@ -502,6 +508,11 @@
       font-size: 12px;
       padding: 0 2px;
       line-height: 1;
+    }
+    .unit-list li .btn-move-unit:hover { color: var(--accent); }
+    .unit-list li .btn-move-unit:disabled {
+      color: var(--border);
+      cursor: default;
     }
     .unit-list li .btn-del-unit:hover { color: var(--red); }
 
@@ -1534,6 +1545,8 @@
       saveErr:         '\u26a0 Speichern fehlgeschlagen \u2013 Fallback aktiv',
       entry1:          ' Eintrag',   entryN: ' Eintr\u00e4ge',
       remove:          'Entfernen',  typeDefault: 'Standard',
+      moveUp:          'Nach oben',
+      moveDown:        'Nach unten',
       renameType:         'Ereignisart umbenennen',
       colorType:          'Farbe \u00e4ndern',
       delRow:          'Eintrag l\u00f6schen',
@@ -1607,6 +1620,8 @@
       saveErr:         '\u26a0 Save failed \u2013 fallback active',
       entry1:          ' entry',     entryN: ' entries',
       remove:          'Remove',     typeDefault: 'Default',
+      moveUp:          'Move up',
+      moveDown:        'Move down',
       renameType:         'Rename event type',
       colorType:          'Change color',
       delRow:          'Delete entry',
@@ -1680,6 +1695,8 @@
       saveErr:         '\u26a0 Ulo\u017een\u00ed selhalo \u2013 z\u00e1loha aktivn\u00ed',
       entry1:          ' z\u00e1znam',  entryN: ' z\u00e1znamy',
       remove:          'Odebrat',    typeDefault: 'V\u00fdchoz\u00ed',
+      moveUp:          'Posunout nahoru',
+      moveDown:        'Posunout dol\u016f',
       renameType:         'P\u0159ejmenovat typ ud\u00e1losti',
       colorType:          'Zm\u011bnit barvu',
       delRow:          'Smazat z\u00e1znam',
@@ -2405,7 +2422,11 @@
           `${escHtml(getStatusLabel(status))}` +
         `</button>` +
         `<span class="unit-name">${escHtml(u)}</span>` +
-        `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>`;
+        `<div class="unit-actions">` +
+          `<button class="btn-move-unit" data-i="${i}" data-dir="-1" title="${escHtml(t('moveUp'))}"${i === 0 ? ' disabled' : ''}>↑</button>` +
+          `<button class="btn-move-unit" data-i="${i}" data-dir="1" title="${escHtml(t('moveDown'))}"${i === units.length - 1 ? ' disabled' : ''}>↓</button>` +
+          `<button class="btn-del-unit" data-i="${i}" title="${escHtml(t('remove'))}">✕</button>` +
+        `</div>`;
       list.appendChild(li);
     });
 
@@ -2662,6 +2683,14 @@
     units.push(name);
     unitStatuses[name] = getEffectiveStatuses()[0] || 'active';
     input.value = '';
+    save(); renderUnits(); renderLagebild();
+  }
+
+  function moveUnit(fromIndex, direction) {
+    const toIndex = fromIndex + direction;
+    if (fromIndex < 0 || fromIndex >= units.length) return;
+    if (toIndex < 0 || toIndex >= units.length) return;
+    [units[fromIndex], units[toIndex]] = [units[toIndex], units[fromIndex]];
     save(); renderUnits(); renderLagebild();
   }
 
@@ -2982,6 +3011,12 @@
     /* Status badge click – open status selection menu */
     const statusBtn = e.target.closest('.unit-status');
     if (statusBtn) { openStatusMenu(statusBtn.dataset.unit, statusBtn); return; }
+    /* Move button */
+    const moveBtn = e.target.closest('.btn-move-unit');
+    if (moveBtn) {
+      moveUnit(parseInt(moveBtn.dataset.i, 10), parseInt(moveBtn.dataset.dir, 10));
+      return;
+    }
     /* Delete button */
     const delBtn = e.target.closest('.btn-del-unit');
     if (!delBtn) return;
