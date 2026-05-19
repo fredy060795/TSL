@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TSL – Tactical Situation Log</title>
+  <link rel="icon" type="image/png" href="/browser-logo-schwarz.png" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -69,6 +70,20 @@
       flex: 1 1 320px;
       min-width: 0;
     }
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero-logo {
+      width: 72px;
+      height: auto;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+    .hero-copy-text {
+      min-width: 0;
+    }
     header h1 {
       margin: 0 0 8px;
       font-size: 28px;
@@ -80,6 +95,18 @@
       font-size: 14px;
       color: var(--text-dim);
       letter-spacing: 0.01em;
+    }
+    .hero-home-link {
+      display: inline-flex;
+      margin-top: 10px;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .hero-home-link:hover {
+      color: var(--text-strong);
+      text-decoration: underline;
     }
     .header-controls {
       flex: 1 1 460px;
@@ -428,6 +455,27 @@
       width: min(var(--content-max-width), calc(100% - (var(--page-gutter) * 2)));
       margin: 0 auto 24px;
       align-items: flex-start;
+    }
+    .site-footer {
+      width: min(var(--content-max-width), calc(100% - (var(--page-gutter) * 2)));
+      margin: 0 auto 20px;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .site-footer a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .site-footer a:hover {
+      color: var(--text-strong);
+      text-decoration: underline;
     }
 
     /* ── Sidebar wrapper (slide-out) ── */
@@ -1097,6 +1145,12 @@
         margin-top: 12px;
         padding: 16px;
       }
+      .hero-brand {
+        align-items: flex-start;
+      }
+      .hero-logo {
+        width: 56px;
+      }
       header h1 {
         font-size: 24px;
       }
@@ -1140,8 +1194,14 @@
 
 <header>
   <div class="hero-copy">
-    <h1>TSL &mdash; Tactical Situation Log</h1>
-    <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+    <div class="hero-brand">
+      <img class="hero-logo" src="/logo.png" alt="Persistent Systems EU Logo" />
+      <div class="hero-copy-text">
+        <h1>TSL &mdash; Tactical Situation Log</h1>
+        <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+        <a class="hero-home-link" href="https://persistentsystems.eu/" target="_blank" rel="noopener noreferrer">persistentsystems.eu</a>
+      </div>
+    </div>
   </div>
   <div class="header-controls">
     <div class="lang-switch">
@@ -1545,6 +1605,10 @@
 
   </main>
 </div>
+
+<footer class="site-footer">
+  <span>© 2024–2026 Persistent Systems EU – LPU5 Tactical. Alle Rechte vorbehalten.</span>
+</footer>
 
 <script>
   /* ── State ── */
