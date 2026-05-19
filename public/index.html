@@ -33,6 +33,10 @@
       --shadow:        0 24px 54px rgba(18, 42, 71, 0.1);
       --hero-glow:     rgba(18, 61, 116, 0.1);
       --hero-radial-stop: 36%;
+      --eyebrow-spacing: 0.16em;
+      --eyebrow-spacing-mobile: 0.08em;
+      --hero-tag-spacing: 0.04em;
+      --hero-tag-spacing-mobile: 0.08em;
       --content-max-width: 1600px;
       --page-gutter:   20px;
     }
@@ -41,7 +45,7 @@
       margin: 0;
       background:
         radial-gradient(circle at top, var(--hero-glow), transparent var(--hero-radial-stop)),
-        linear-gradient(180deg, #f7fbff 0%, var(--bg) 48%, #e5edf7 100%);
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 50%, #e5edf7 100%);
       color: var(--text);
       font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
@@ -98,7 +102,7 @@
       color: rgba(255, 255, 255, 0.9);
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.16em;
+      letter-spacing: var(--eyebrow-spacing);
       text-transform: uppercase;
     }
     header h1 {
@@ -138,7 +142,7 @@
       color: #ffffff;
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: var(--hero-tag-spacing);
     }
     .header-controls {
       flex: 0 1 500px;
@@ -1277,9 +1281,11 @@
         margin-top: 12px;
         padding: 16px;
       }
-      .hero-eyebrow,
+      .hero-eyebrow {
+        letter-spacing: var(--eyebrow-spacing-mobile);
+      }
       .hero-tag {
-        letter-spacing: 0.08em;
+        letter-spacing: var(--hero-tag-spacing-mobile);
       }
       header h1 {
         font-size: 24px;
