@@ -2654,29 +2654,33 @@
     });
   }
 
+  const MEDICAL_UI_FALLBACK = {
+    buttonLabel: '',
+    buttonAria: '',
+    panelTitle: '',
+    panelSubtitle: '',
+    sections: [],
+    fieldLabels: {},
+    placeholders: {},
+    selectOptions: {},
+    flags: {},
+    cards: [],
+    previewTitle: '',
+    previewEmpty: '',
+    summaryStored: '',
+    resetButton: '',
+    resetTitle: '',
+    createLogButton: '',
+    summaryLabels: {},
+  };
+
   function getMedicalUi() {
-    return (LANGS[lang] && LANGS[lang].medicalUi) ||
-           LANGS.de?.medicalUi ||
-           LANGS.en?.medicalUi ||
-           {
-             buttonLabel: '',
-             buttonAria: '',
-             panelTitle: '',
-             panelSubtitle: '',
-             sections: [],
-             fieldLabels: {},
-             placeholders: {},
-             selectOptions: {},
-             flags: {},
-             cards: [],
-             previewTitle: '',
-             previewEmpty: '',
-             summaryStored: '',
-             resetButton: '',
-             resetTitle: '',
-             createLogButton: '',
-             summaryLabels: {},
-           };
+    const ui = (LANGS[lang] && LANGS[lang].medicalUi) ||
+               LANGS.de?.medicalUi ||
+               LANGS.en?.medicalUi;
+    if (ui) return ui;
+    console.warn('Missing medical UI translations for language', lang);
+    return MEDICAL_UI_FALLBACK;
   }
 
   function setMedicalLabel(id, text) {
@@ -2716,17 +2720,17 @@
 
     const btnMedical = document.getElementById('btnMedical');
     if (btnMedical) {
-      btnMedical.innerHTML = `&#9877; ${escHtml(ui.buttonLabel)}`;
+      btnMedical.innerHTML = `&#9877; ${escHtml(ui.buttonLabel || '')}`;
       btnMedical.setAttribute('aria-label', ui.buttonAria);
     }
 
     const panelHeading = document.querySelector('#medicalPanel h3');
     if (panelHeading) {
-      panelHeading.innerHTML = `<span>${escHtml(ui.panelTitle)}</span><span class="medical-subtitle">${escHtml(ui.panelSubtitle)}</span>`;
+      panelHeading.innerHTML = `<span>${escHtml(ui.panelTitle || '')}</span><span class="medical-subtitle">${escHtml(ui.panelSubtitle || '')}</span>`;
     }
 
     if (ui.sections && ui.sections.length !== sectionHeadings.length) {
-      console.warn('Medical UI sections mismatch:', ui.sections.length, sectionHeadings.length);
+      console.warn('Medical UI sections mismatch for language', lang, ':', ui.sections.length, sectionHeadings.length);
     }
     ui.sections?.forEach((title, index) => {
       if (sectionHeadings[index]) sectionHeadings[index].textContent = title;
@@ -2839,7 +2843,7 @@
     if (!preview) return;
     const ui = getMedicalUi();
     const summary = buildMedicalSummary();
-    preview.innerHTML = `<strong>${escHtml(ui.previewTitle)}</strong> ${escHtml(summary || ui.previewEmpty)}`;
+    preview.innerHTML = `<strong>${escHtml(ui.previewTitle || '')}</strong> ${escHtml(summary || ui.previewEmpty || '')}`;
   }
 
   function resetMedicalForm() {
@@ -2855,7 +2859,7 @@
     }
     log.push({
       zeit: nowTime(),
-      von: medicalState.medicalReportingUnit || tType('Medical'),
+      von: medicalState.medicalReportingUnit || getMedicalUi().buttonLabel || 'Medical',
       an: medicalState.medicalReceivingUnit || '',
       art: 'Medical',
       inhalt: summary,
