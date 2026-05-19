@@ -946,7 +946,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
     <button class="sprachtafel-btn" id="btnNato" data-i18n-title="natoTitle" title="NATO Alphabet">&#129517; NATO</button>
-    <button class="sprachtafel-btn" id="btnMedical" title="Medical emergency workflow">&#9877; Medical</button>
+    <button class="sprachtafel-btn" id="btnMedical" title="Medical emergency workflow" aria-label="Medical emergency workflow">&#9877; Medical</button>
     <button class="sprachtafel-btn" id="btnSitrep" title="SITREP">&#128203; SITREP</button>
     <button class="sprachtafel-btn" id="btnMap" title="Karte / MAP">&#128506; MAP</button>
     <div style="text-align:right;">
@@ -1793,7 +1793,6 @@
       st.put(builtinLabels,   'builtinLabels');
       st.put(builtinColors,   'builtinColors');
       st.put(typeColors,      'typeColors');
-      st.put(medicalState,    'medicalState');
       st.put(Date.now(),      'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
@@ -1813,7 +1812,7 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, cs, bs, bl, bc, tc, ms, ts] = await Promise.all([
+      const [u, t, l, us, cs, bs, bl, bc, tc, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
@@ -1823,10 +1822,9 @@
         idbGet(st, 'builtinLabels'),
         idbGet(st, 'builtinColors'),
         idbGet(st, 'typeColors'),
-        idbGet(st, 'medicalState'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, medicalState: ms, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -1878,7 +1876,7 @@
       const payload = {
         units, types, log,
         unitStatuses, customStatuses, builtinStatuses,
-        builtinLabels, builtinColors, typeColors, medicalState,
+        builtinLabels, builtinColors, typeColors,
       };
       const res = await fetch(getApiBase() + '/api/state', {
         method:  'POST',
@@ -1926,7 +1924,6 @@
       localStorage.setItem('tsl_builtinLabels',   JSON.stringify(builtinLabels));
       localStorage.setItem('tsl_builtinColors',   JSON.stringify(builtinColors));
       localStorage.setItem('tsl_typeColors',      JSON.stringify(typeColors));
-      localStorage.setItem('tsl_medicalState',    JSON.stringify(medicalState));
       localStorage.setItem('tsl_lang',            lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Try backend first; falls back to IDB inside saveToBackend() */
@@ -1955,7 +1952,7 @@
       builtinLabels   = (d.builtinLabels  && typeof d.builtinLabels  === 'object') ? d.builtinLabels  : {};
       builtinColors   = (d.builtinColors  && typeof d.builtinColors  === 'object') ? d.builtinColors  : {};
       typeColors      = (d.typeColors     && typeof d.typeColors     === 'object') ? d.typeColors     : {};
-      medicalState    = (d.medicalState   && typeof d.medicalState   === 'object') ? { ...createDefaultMedicalState(), ...d.medicalState } : createDefaultMedicalState();
+      medicalState    = createDefaultMedicalState();
       ensureUnitStatuses();
       if (d.lastSaved) setSaveStatus(true);
     }
@@ -2010,10 +2007,7 @@
       const p = JSON.parse(localStorage.getItem('tsl_typeColors'));
       typeColors = (p && typeof p === 'object') ? p : {};
     } catch(e) { typeColors = {}; }
-    try {
-      const p = JSON.parse(localStorage.getItem('tsl_medicalState'));
-      medicalState = (p && typeof p === 'object') ? { ...createDefaultMedicalState(), ...p } : createDefaultMedicalState();
-    } catch(e) { medicalState = createDefaultMedicalState(); }
+    medicalState = createDefaultMedicalState();
     ensureUnitStatuses();
     /* Migrate into IDB */
     if (idbAvailable && (units.length > 0 || log.length > 0)) saveToIDB();
@@ -2097,7 +2091,7 @@
     syncMedicalStateFromForm();
     renderMedicalPreview();
     clearTimeout(medicalSaveTimer);
-    medicalSaveTimer = setTimeout(() => save(), 250);
+    medicalSaveTimer = setTimeout(() => save(), 700);
   }
 
   function buildMedicalSummary() {
@@ -2148,12 +2142,14 @@
   }
 
   function resetMedicalForm() {
+    clearTimeout(medicalSaveTimer);
     medicalState = createDefaultMedicalState();
     fillMedicalForm();
     save();
   }
 
   function addMedicalLogEntry() {
+    clearTimeout(medicalSaveTimer);
     const summary = buildMedicalSummary();
     if (!summary) {
       document.getElementById('medicalWho')?.focus();
