@@ -8,6 +8,7 @@ Leichtgewichtiges Lagetagebuch für taktische Lagen.
 - **Neuer Eintrag**: Zeit (automatisch), Von, An, Art, Inhalt — mit Enter oder Schaltfläche eintragen
 - **Arten**: Anforderung · Truppenmeldung · Feindmeldung · Meldung · Sonstiges
 - **Lagetagebuch**: fortlaufend nummeriert, farbige Badges pro Art, scrollbar
+- **Medical-Panel**: eigener Bereich für medizinische Notfälle mit Abfrageschema, Dokumentation und automatischem Log-Eintrag
 - **Export**: CSV-Export aller Einträge
 - **Persistenz**: Daten werden auf dem Server in einer SQLite-Datenbank gespeichert (Fallback: IndexedDB / localStorage)
 
