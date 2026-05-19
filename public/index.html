@@ -8,31 +8,42 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:            #0d1117;
-      --panel:         #161b22;
-      --panel-2:       #1f2630;
-      --border:        #30363d;
-      --border-soft:   rgba(48, 54, 61, 0.7);
-      --accent:        #2f81f7;
-      --accent-strong: #1f6feb;
-      --accent-border: #388bfd;
-      --accent-soft:   rgba(47, 129, 247, 0.12);
-      --accent-hover:  rgba(47, 129, 247, 0.18);
-      --accent-shadow: rgba(31, 111, 235, 0.25);
-      --text:          #e6edf3;
-      --text-dim:      #8b949e;
-      --text-strong:   #ffffff;
-      --red:           #f85149;
-      --red-soft:      rgba(248, 81, 73, 0.12);
-      --blue:          #58a6ff;
-      --orange:        #d29922;
-      --green:         #3fb950;
-      --field:         #0f141b;
-      --row-even:      #121821;
-      --row-odd:       #0f141b;
-      --shadow:        0 10px 30px rgba(0,0,0,0.18);
-      --hero-glow:     rgba(47, 129, 247, 0.09);
+      --bg:            #edf3f9;
+      --panel:         rgba(255, 255, 255, 0.97);
+      --panel-2:       #e8f0f8;
+      --border:        #ccd8e6;
+      --border-soft:   rgba(180, 194, 212, 0.72);
+      --accent-rgb:    18, 61, 116;
+      --accent-strong-rgb: 12, 47, 89;
+      --accent-border-rgb: 242, 140, 40;
+      --accent:        #123d74;
+      --accent-strong: #0c2f59;
+      --accent-deep:   #092442;
+      --accent-border: #f28c28;
+      --accent-soft:   rgba(18, 61, 116, 0.09);
+      --accent-hover:  rgba(18, 61, 116, 0.13);
+      --accent-shadow: rgba(12, 47, 89, 0.16);
+      --text:          #16314f;
+      --text-dim:      #60758f;
+      --text-strong:   #081d33;
+      --red:           #c74e46;
+      --red-soft:      rgba(199, 78, 70, 0.12);
+      --blue:          #2d77c9;
+      --orange:        #f28c28;
+      --green:         #287a53;
+      --field:         #f8fbff;
+      --row-even:      #ffffff;
+      --row-odd:       #f5f8fc;
+      --shadow:        0 24px 54px rgba(18, 42, 71, 0.1);
+      --hero-glow:     rgba(var(--accent-rgb), 0.1);
       --hero-radial-stop: 34%;
+      --eyebrow-spacing: 0.16em;
+      --eyebrow-spacing-compact: 0.08em;
+      --hero-tag-spacing: 0.04em;
+      --hero-tag-spacing-mobile: 0.08em;
+      --subtitle-spacing: 0.18em;
+      --card-accent-height: 6px;
+      --section-accent-height: 4px;
       --content-max-width: 1600px;
       --page-gutter:   20px;
     }
@@ -41,9 +52,9 @@
       margin: 0;
       background:
         radial-gradient(circle at top, var(--hero-glow), transparent var(--hero-radial-stop)),
-        linear-gradient(180deg, #0b1118 0%, var(--bg) 100%);
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 50%, #e5edf7 100%);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
       min-height: 100vh;
       display: flex;
@@ -52,77 +63,141 @@
 
     /* ── Header ── */
     header {
+      position: relative;
+      overflow: hidden;
       width: min(var(--content-max-width), calc(100% - (var(--page-gutter) * 2)));
       margin: var(--page-gutter) auto 16px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 20px 22px;
+      background: linear-gradient(135deg, rgba(var(--accent-strong-rgb), 0.98) 0%, rgba(var(--accent-rgb), 0.96) 58%, rgba(var(--accent-border-rgb), 0.22) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 24px;
+      box-shadow: 0 28px 60px rgba(11, 32, 57, 0.22);
+      padding: 28px;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(var(--accent-border-rgb), 0.22), transparent 34%),
+        linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 55%);
+      pointer-events: none;
+    }
+    .hero-copy,
+    .header-controls {
+      position: relative;
+      z-index: 1;
     }
     .hero-copy {
-      flex: 1 1 320px;
+      flex: 1 1 430px;
       min-width: 0;
+      max-width: 780px;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: var(--eyebrow-spacing);
+      text-transform: uppercase;
     }
     header h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
+      margin: 0 0 10px;
+      font-size: clamp(30px, 4vw, 42px);
       font-weight: 700;
       letter-spacing: 0.01em;
-      color: var(--text);
+      color: #ffffff;
     }
     header .subtitle {
-      font-size: 14px;
-      color: var(--text-dim);
-      letter-spacing: 0.01em;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: var(--subtitle-spacing);
+      text-transform: uppercase;
     }
-    .header-controls {
-      flex: 1 1 460px;
+    .hero-description {
+      max-width: 620px;
+      margin-bottom: 16px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.88);
+    }
+    .hero-tags {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      gap: 10px;
+    }
+    .hero-tag {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
+      min-height: 36px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: var(--hero-tag-spacing);
+    }
+    .header-controls {
+      flex: 0 1 500px;
+      min-width: 320px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .hero-actions {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 10px;
       align-items: center;
     }
     .header-status {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 4px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      min-width: 180px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      min-width: 190px;
     }
     .clock {
-      font-size: 18px;
-      color: var(--text);
+      font-size: 20px;
+      color: #ffffff;
       letter-spacing: 0.08em;
       font-weight: 700;
       line-height: 1;
     }
     .save-status {
       font-size: 12px;
-      color: var(--text-dim);
+      color: rgba(255, 255, 255, 0.76);
       letter-spacing: 0.02em;
-      text-align: right;
+      text-align: left;
       margin-top: 0;
     }
-    .save-status.ok  { color: var(--green); }
-    .save-status.err { color: var(--red); }
+    .save-status.ok  { color: #99e2bc; }
+    .save-status.err { color: #ffc3bd; }
 
     /* ── Sprachtafel (radio communication table) ── */
     .sprachtafel-btn {
@@ -1055,6 +1130,120 @@
       letter-spacing: 0.04em;
     }
 
+    /* ── Product shell refinements ── */
+    .overview-grid {
+      width: min(var(--content-max-width), calc(100% - (var(--page-gutter) * 2)));
+      margin: 0 auto 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .overview-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      padding: 22px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      box-shadow: var(--shadow);
+    }
+    .overview-card::before {
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      height: var(--card-accent-height);
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-border) 100%);
+    }
+    .overview-card .overview-label {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: var(--eyebrow-spacing);
+      text-transform: uppercase;
+    }
+    .overview-card h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      color: var(--text-strong);
+    }
+    .overview-card p {
+      margin: 0;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .sidebar,
+    .lagebild,
+    .entry-form,
+    .log-section {
+      border-top: var(--section-accent-height) solid var(--accent-border);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+    }
+    .sidebar h2,
+    .lagebild-title,
+    .form-group label,
+    .sprachtafel-panel h3,
+    thead th {
+      color: var(--accent);
+    }
+    .btn-add-unit,
+    .btn-log {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      border-color: transparent;
+    }
+    .btn-add-unit:hover,
+    .btn-log:hover {
+      background: linear-gradient(135deg, var(--accent-strong) 0%, var(--accent-deep) 100%);
+      box-shadow: 0 10px 26px var(--accent-shadow);
+    }
+    header .sprachtafel-btn,
+    header .btn-lang {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+    }
+    header .sprachtafel-btn:hover,
+    header .btn-lang:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.34);
+      color: #ffffff;
+    }
+    header .sprachtafel-btn.active,
+    header .btn-lang.active {
+      background: var(--accent-border);
+      border-color: var(--accent-border);
+      color: #081d33;
+    }
+    .btn-reset,
+    .btn-clear-log,
+    .btn-export {
+      background: #ffffff;
+    }
+    .btn-reset:hover,
+    .btn-clear-log:hover,
+    .btn-export:hover {
+      box-shadow: 0 6px 18px rgba(12, 47, 89, 0.08);
+    }
+    .sidebar-toggle {
+      background: #ffffff;
+      border-color: var(--border);
+      color: var(--accent);
+    }
+    .sidebar-wrapper.open .sidebar-toggle {
+      border-color: var(--accent-border);
+      color: #ffffff;
+      background: var(--accent);
+    }
+    .table-wrap,
+    .sprachtafel-panel,
+    .medical-section,
+    .medical-card,
+    .medical-preview {
+      background: #ffffff;
+    }
+
     /* scrollbar */
     .table-wrap,
     .sidebar,
@@ -1090,12 +1279,19 @@
 
     @media (max-width: 900px) {
       header,
+      .overview-grid,
       .layout {
         width: calc(100% - 24px);
       }
       header {
         margin-top: 12px;
         padding: 16px;
+      }
+      .hero-eyebrow {
+        letter-spacing: var(--eyebrow-spacing-compact);
+      }
+      .hero-tag {
+        letter-spacing: var(--hero-tag-spacing-mobile);
       }
       header h1 {
         font-size: 24px;
@@ -1140,8 +1336,15 @@
 
 <header>
   <div class="hero-copy">
+    <div class="hero-eyebrow" data-i18n="heroEyebrow">Persistent Systems Produktoberfläche</div>
     <h1>TSL &mdash; Tactical Situation Log</h1>
     <div class="subtitle" data-i18n="subtitle">Lagemeldung &bull; Funkverkehr &bull; Echtzeit</div>
+    <p class="hero-description" data-i18n="heroDescription">TSL verbindet Lagebild, strukturiertes Funk-Logging und Medical-Workflows in einer einheitlichen, produktorientierten Oberfläche.</p>
+    <div class="hero-tags">
+      <span class="hero-tag" data-i18n="heroTagOne">Lagebild</span>
+      <span class="hero-tag" data-i18n="heroTagTwo">Funkprotokoll</span>
+      <span class="hero-tag" data-i18n="heroTagThree">Medical-Support</span>
+    </div>
   </div>
   <div class="header-controls">
     <div class="lang-switch">
@@ -1163,6 +1366,24 @@
     </div>
   </div>
 </header>
+
+<section class="overview-grid" aria-label="TSL product overview">
+  <article class="overview-card">
+    <span class="overview-label" data-i18n="overviewLabelOne">Einsatzübersicht</span>
+    <h2 data-i18n="overviewTitleOne">Klarer Produktauftritt</h2>
+    <p data-i18n="overviewTextOne">Die Oberfläche orientiert sich jetzt stärker an einer hellen, strukturierten Produktseite mit klaren Informationsblöcken.</p>
+  </article>
+  <article class="overview-card">
+    <span class="overview-label" data-i18n="overviewLabelTwo">Arbeitsbereich</span>
+    <h2 data-i18n="overviewTitleTwo">Schneller Zugriff</h2>
+    <p data-i18n="overviewTextTwo">Sprachtafel, NATO, Medical, SITREP, Karte und Notizen bleiben als zentrale Schnellaktionen direkt im Kopfbereich erreichbar.</p>
+  </article>
+  <article class="overview-card">
+    <span class="overview-label" data-i18n="overviewLabelThree">Protokollierung</span>
+    <h2 data-i18n="overviewTitleThree">Einheitliches Layout</h2>
+    <p data-i18n="overviewTextThree">Konfiguration, Lagebild und Einsatzprotokoll nutzen denselben Kartenstil, damit TSL optisch besser zu weiteren Persistent Systems Produkten passt.</p>
+  </article>
+</section>
 
 <!-- Sprachtafel Panel -->
 <div class="sprachtafel-panel" id="sprachtafelPanel">
@@ -1555,6 +1776,20 @@
   const LANGS = {
     de: {
       subtitle:        'Lagemeldung \u2022 Funkverkehr \u2022 Echtzeit',
+      heroEyebrow:     'Persistent Systems Produktoberfläche',
+      heroDescription: 'TSL verbindet Lagebild, strukturiertes Funk-Logging und Medical-Workflows in einer einheitlichen, produktorientierten Oberfläche.',
+      heroTagOne:      'Lagebild',
+      heroTagTwo:      'Funkprotokoll',
+      heroTagThree:    'Medical-Support',
+      overviewLabelOne:   'Einsatzübersicht',
+      overviewTitleOne:   'Klarer Produktauftritt',
+      overviewTextOne:    'Die Oberfläche orientiert sich jetzt stärker an einer hellen, strukturierten Produktseite mit klaren Informationsblöcken.',
+      overviewLabelTwo:   'Arbeitsbereich',
+      overviewTitleTwo:   'Schneller Zugriff',
+      overviewTextTwo:    'Sprachtafel, NATO, Medical, SITREP, Karte und Notizen bleiben als zentrale Schnellaktionen direkt im Kopfbereich erreichbar.',
+      overviewLabelThree: 'Protokollierung',
+      overviewTitleThree: 'Einheitliches Layout',
+      overviewTextThree:  'Konfiguration, Lagebild und Einsatzprotokoll nutzen denselben Kartenstil, damit TSL optisch besser zu weiteren Persistent Systems Produkten passt.',
       sidebarUnits:    'Einheiten',
       unitPlaceholder: 'Einheit\u2026',
       btnAddUnitTitle: 'Einheit hinzuf\u00fcgen',
@@ -1744,6 +1979,20 @@
     },
     en: {
       subtitle:        'Situation Report \u2022 Radio Traffic \u2022 Real-Time',
+      heroEyebrow:     'Persistent Systems Product Interface',
+      heroDescription: 'TSL combines status awareness, structured radio logging, and medical workflows in one consistent, product-oriented interface.',
+      heroTagOne:      'Status board',
+      heroTagTwo:      'Radio log',
+      heroTagThree:    'Medical support',
+      overviewLabelOne:   'Mission overview',
+      overviewTitleOne:   'Clear product presentation',
+      overviewTextOne:    'The interface now follows a lighter, structured product-page design with clearly separated information blocks.',
+      overviewLabelTwo:   'Workspace',
+      overviewTitleTwo:   'Fast access',
+      overviewTextTwo:    'Radio table, NATO, medical, SITREP, map, and notes remain available as primary quick actions in the header.',
+      overviewLabelThree: 'Logging',
+      overviewTitleThree: 'Consistent layout',
+      overviewTextThree:  'Configuration, status board, and operational log now share the same card treatment so TSL fits better with other Persistent Systems products.',
       sidebarUnits:    'Units',
       unitPlaceholder: 'Unit\u2026',
       btnAddUnitTitle: 'Add unit',
@@ -1933,6 +2182,20 @@
     },
     cz: {
       subtitle:        'Situačn\u00ed hl\u00e1šen\u00ed \u2022 R\u00e1diov\u00fd provoz \u2022 Re\u00e1ln\u00fd \u010das',
+      heroEyebrow:     'Produktové rozhraní Persistent Systems',
+      heroDescription: 'TSL spojuje přehled situace, strukturované rádiové protokolování a zdravotnické workflow do jednoho konzistentního produktového rozhraní.',
+      heroTagOne:      'Přehled stavu',
+      heroTagTwo:      'Rádiový protokol',
+      heroTagThree:    'Zdravotnická podpora',
+      overviewLabelOne:   'Přehled mise',
+      overviewTitleOne:   'Jasný produktový vzhled',
+      overviewTextOne:    'Rozhraní nyní více odpovídá světlé, strukturované produktové stránce s jasně oddělenými informačními bloky.',
+      overviewLabelTwo:   'Pracovní prostor',
+      overviewTitleTwo:   'Rychlý přístup',
+      overviewTextTwo:    'Tabulka spojení, NATO, zdravotnický panel, SITREP, mapa a poznámky zůstávají v hlavičce jako hlavní rychlé akce.',
+      overviewLabelThree: 'Protokolování',
+      overviewTitleThree: 'Jednotné rozvržení',
+      overviewTextThree:  'Konfigurace, přehled stavu a operační deník nyní používají stejný styl karet, takže TSL lépe zapadá mezi další produkty Persistent Systems.',
       sidebarUnits:    'Jednotky',
       unitPlaceholder: 'Jednotka\u2026',
       btnAddUnitTitle: 'P\u0159idat jednotku',
