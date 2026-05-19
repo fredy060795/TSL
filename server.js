@@ -77,6 +77,7 @@ app.get('/api/state', (req, res) => {
       builtinLabels:   getJson('builtinLabels',   {}),
       builtinColors:   getJson('builtinColors',   {}),
       typeColors:      getJson('typeColors',      {}),
+      notesText:       getJson('notesText',       ''),
       lastSaved:       getJson('lastSaved',       null),
     };
     res.json(state);
@@ -103,6 +104,7 @@ app.post('/api/state', (req, res) => {
       if (body.builtinLabels  != null)         setJson('builtinLabels',   body.builtinLabels);
       if (body.builtinColors  != null)         setJson('builtinColors',   body.builtinColors);
       if (body.typeColors     != null)         setJson('typeColors',      body.typeColors);
+      if (typeof body.notesText === 'string')  setJson('notesText',       body.notesText);
       setJson('lastSaved', Date.now());
 
       /* Sync log entries: replace all with incoming data */

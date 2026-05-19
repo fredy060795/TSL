@@ -170,6 +170,37 @@
       width: min(820px, calc(100vw - 32px));
       max-width: 100%;
     }
+    .notes-panel {
+      width: min(520px, calc(100vw - 32px));
+      max-width: 100%;
+    }
+    .notes-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .notes-field label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .notes-field textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      background: var(--field);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    .notes-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
     .medical-panel h3 {
       display: flex;
       align-items: center;
@@ -1113,6 +1144,7 @@
       <button class="sprachtafel-btn" id="btnMedical" data-i18n-title="medicalTitle" title="Medical emergency workflow" aria-label="Open medical emergency workflow panel">&#9877; Medical</button>
       <button class="sprachtafel-btn" id="btnSitrep" title="SITREP">&#128203; SITREP</button>
       <button class="sprachtafel-btn" id="btnMap" title="Karte / MAP">&#128506; MAP</button>
+      <button class="sprachtafel-btn" id="btnNotes" data-i18n-title="notesTitle" title="Notizen">&#128221; NOTIZEN</button>
     </div>
     <div class="header-status">
       <div class="clock" id="clock">00:00:00</div>
@@ -1168,6 +1200,14 @@
 <div class="sprachtafel-panel" id="mapPanel" style="max-width:90vw;">
   <h3>Karte / MAP</h3>
   <img src="KARTE.jpg" alt="Karte" style="max-width:100%;max-height:calc(100vh - 120px);display:block;"/>
+</div>
+
+<div class="sprachtafel-panel notes-panel" id="notesPanel">
+  <h3 data-i18n="notesTitle">Notizen</h3>
+  <div class="notes-field">
+    <label for="notesInput" data-i18n="notesTitle">Notizen</label>
+    <textarea id="notesInput" data-i18n-ph="notesPlaceholder" placeholder="Freie Notizen..."></textarea>
+  </div>
 </div>
 
 <div class="sprachtafel-panel medical-panel" id="medicalPanel">
@@ -1561,6 +1601,8 @@
       sprachtafelTitle:   'Sprachtafel Funk',
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical-Notfallablauf',
+      notesTitle:         'Notizen',
+      notesPlaceholder:   'Freie Notizen…',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1634,6 +1676,8 @@
       sprachtafelTitle:   'Radio Communication Table',
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical emergency workflow',
+      notesTitle:         'Notes',
+      notesPlaceholder:   'Free notes…',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1707,6 +1751,8 @@
       sprachtafelTitle:   'Tabulka Spojen\u00ed',
       natoTitle:          'Abeceda NATO',
       medicalTitle:       'Medical emergency workflow',
+      notesTitle:         'Poznámky',
+      notesPlaceholder:   'Volné poznámky…',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
         ['Ende',          'Konec'],
@@ -1780,6 +1826,7 @@
   let builtinLabels   = {};  /* { id: customLabel } – overrides i18n labels for built-in statuses */
   let builtinColors   = {};  /* { id: {bg,color,border} } – overrides default colors for built-in statuses */
   let typeColors      = {};  /* { typeName: {bg,color,border} } – custom colors for event types */
+  let notesText       = '';
   let medicalState    = null;
   const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
   const MEDICAL_FIELDS = [
@@ -1960,6 +2007,7 @@
       st.put(builtinLabels,   'builtinLabels');
       st.put(builtinColors,   'builtinColors');
       st.put(typeColors,      'typeColors');
+      st.put(notesText,       'notesText');
       st.put(Date.now(),      'lastSaved');
       await new Promise((res, rej) => {
         tx.oncomplete = res;
@@ -1979,7 +2027,7 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, cs, bs, bl, bc, tc, ts] = await Promise.all([
+      const [u, t, l, us, cs, bs, bl, bc, tc, nt, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
@@ -1989,9 +2037,10 @@
         idbGet(st, 'builtinLabels'),
         idbGet(st, 'builtinColors'),
         idbGet(st, 'typeColors'),
+        idbGet(st, 'notesText'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, notesText: nt, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
@@ -2043,7 +2092,7 @@
       const payload = {
         units, types, log,
         unitStatuses, customStatuses, builtinStatuses,
-        builtinLabels, builtinColors, typeColors,
+        builtinLabels, builtinColors, typeColors, notesText,
       };
       const res = await fetch(getApiBase() + '/api/state', {
         method:  'POST',
@@ -2091,6 +2140,7 @@
       localStorage.setItem('tsl_builtinLabels',   JSON.stringify(builtinLabels));
       localStorage.setItem('tsl_builtinColors',   JSON.stringify(builtinColors));
       localStorage.setItem('tsl_typeColors',      JSON.stringify(typeColors));
+      localStorage.setItem('tsl_notesText',       JSON.stringify(notesText));
       localStorage.setItem('tsl_lang',            lang);
     } catch(e) { console.warn('localStorage write failed:', e); }
     /* Try backend first; falls back to IDB inside saveToBackend() */
@@ -2119,6 +2169,7 @@
       builtinLabels   = (d.builtinLabels  && typeof d.builtinLabels  === 'object') ? d.builtinLabels  : {};
       builtinColors   = (d.builtinColors  && typeof d.builtinColors  === 'object') ? d.builtinColors  : {};
       typeColors      = (d.typeColors     && typeof d.typeColors     === 'object') ? d.typeColors     : {};
+      notesText       = typeof d.notesText === 'string' ? d.notesText : '';
       medicalState    = createDefaultMedicalState();
       ensureUnitStatuses();
       if (d.lastSaved) setSaveStatus(true);
@@ -2174,6 +2225,10 @@
       const p = JSON.parse(localStorage.getItem('tsl_typeColors'));
       typeColors = (p && typeof p === 'object') ? p : {};
     } catch(e) { typeColors = {}; }
+    try {
+      const p = JSON.parse(localStorage.getItem('tsl_notesText'));
+      notesText = typeof p === 'string' ? p : '';
+    } catch(e) { notesText = ''; }
     medicalState = createDefaultMedicalState();
     ensureUnitStatuses();
     /* Migrate into IDB */
@@ -2221,7 +2276,7 @@
   }
 
   function closeUtilityPanels(except = '') {
-    ['sprachtafel', 'nato', 'medical', 'sitrep', 'map'].forEach(name => {
+    ['sprachtafel', 'nato', 'medical', 'sitrep', 'map', 'notes'].forEach(name => {
       const panelId = name + 'Panel';
       const btnId = 'btn' + name.charAt(0).toUpperCase() + name.slice(1);
       if (panelId === except) return;
@@ -2252,6 +2307,17 @@
       if (el) el.checked = !!medicalState[id];
     });
     renderMedicalPreview();
+  }
+
+  function fillNotesForm() {
+    const el = document.getElementById('notesInput');
+    if (el) el.value = notesText || '';
+  }
+
+  function scheduleNotesSave() {
+    const el = document.getElementById('notesInput');
+    notesText = el ? el.value : '';
+    save();
   }
 
   function scheduleMedicalSave() {
@@ -2370,6 +2436,15 @@
     this.classList.toggle('active', isOpen);
   });
 
+  document.getElementById('btnNotes')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    closeUtilityPanels('notesPanel');
+    const panel = document.getElementById('notesPanel');
+    const isOpen = panel.classList.toggle('open');
+    this.classList.toggle('active', isOpen);
+    if (isOpen) fillNotesForm();
+  });
+
   document.addEventListener('click', function(e) {
     [
       ['sprachtafelPanel', 'btnSprachtafel'],
@@ -2377,6 +2452,7 @@
       ['medicalPanel', 'btnMedical'],
       ['sitrepPanel', 'btnSitrep'],
       ['mapPanel', 'btnMap'],
+      ['notesPanel', 'btnNotes'],
     ].forEach(([panelId, btnId]) => {
       const panel = document.getElementById(panelId);
       const btn   = document.getElementById(btnId);
@@ -3092,6 +3168,8 @@
   });
 
   document.getElementById('btnExport').addEventListener('click', exportCSV);
+  document.getElementById('notesInput')?.addEventListener('input', scheduleNotesSave);
+  document.getElementById('notesInput')?.addEventListener('change', scheduleNotesSave);
   MEDICAL_FIELDS.forEach(id => {
     document.getElementById(id)?.addEventListener('input', scheduleMedicalSave);
     document.getElementById(id)?.addEventListener('change', scheduleMedicalSave);
@@ -3104,6 +3182,7 @@
 
   /* ── Init ── */
   load().then(() => {
+    fillNotesForm();
     fillMedicalForm();
     applyLang();  /* sets lang, renders all panels, applies translations */
   });
