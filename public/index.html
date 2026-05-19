@@ -32,7 +32,7 @@
       --row-odd:       #0f141b;
       --shadow:        0 10px 30px rgba(0,0,0,0.18);
       --hero-glow:     rgba(47, 129, 247, 0.09);
-      --hero-glow-stop: 34%;
+      --hero-radial-stop: 34%;
       --content-max-width: 1600px;
       --page-gutter:   20px;
     }
@@ -40,7 +40,7 @@
     body {
       margin: 0;
       background:
-        radial-gradient(circle at top, var(--hero-glow), transparent var(--hero-glow-stop)),
+        radial-gradient(circle at top, var(--hero-glow), transparent var(--hero-radial-stop)),
         linear-gradient(180deg, #0b1118 0%, var(--bg) 100%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -143,7 +143,6 @@
       border-color: var(--accent);
       color: var(--text);
       background: var(--accent-hover);
-      transform: translateY(-1px);
     }
     .sprachtafel-btn.active {
       border-color: var(--accent-border);
@@ -434,7 +433,6 @@
       color: var(--text-strong);
       border-color: var(--accent-border);
       background: var(--accent-strong);
-      transform: translateY(-1px);
     }
     .sidebar-wrapper.open .sidebar-toggle { border-color: var(--accent-border); color: var(--text-strong); background: var(--accent-strong); }
 
@@ -868,7 +866,6 @@
     .btn-log:hover {
       background: var(--accent-strong);
       box-shadow: 0 0 0 1px var(--accent-border), 0 6px 18px var(--accent-shadow);
-      transform: translateY(-1px);
     }
 
     .btn-reset {
@@ -1025,10 +1022,13 @@
       scrollbar-width: thin;
       scrollbar-color: var(--border) var(--bg);
     }
+    :is(.sprachtafel-btn:hover, .sidebar-toggle:hover, .btn-log:hover) {
+      transform: translateY(-1px);
+    }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent-strong); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-border); }
 
     @media (max-width: 1200px) {
       .layout {
