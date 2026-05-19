@@ -946,7 +946,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <button class="sprachtafel-btn" id="btnSprachtafel" data-i18n-title="sprachtafelTitle" title="Sprachtafel Funk">&#128246; Funk</button>
     <button class="sprachtafel-btn" id="btnNato" data-i18n-title="natoTitle" title="NATO Alphabet">&#129517; NATO</button>
-    <button class="sprachtafel-btn" id="btnMedical" title="Medical emergency workflow" aria-label="Medical emergency workflow">&#9877; Medical</button>
+    <button class="sprachtafel-btn" id="btnMedical" data-i18n-title="medicalTitle" title="Medical emergency workflow" aria-label="Open medical emergency workflow panel">&#9877; Medical</button>
     <button class="sprachtafel-btn" id="btnSitrep" title="SITREP">&#128203; SITREP</button>
     <button class="sprachtafel-btn" id="btnMap" title="Karte / MAP">&#128506; MAP</button>
     <div style="text-align:right;">
@@ -1203,7 +1203,7 @@
     </div>
 
     <div class="medical-section">
-      <div class="medical-preview" id="medicalPreview"><strong>Auto log preview</strong>Fill the fields to build the automatic medical log entry.</div>
+      <div class="medical-preview" id="medicalPreview"><strong>Auto log preview</strong> Fill the fields to build the automatic medical log entry.</div>
       <div class="medical-actions" style="margin-top:10px;">
         <span class="medical-subtitle">The summary is stored in the log automatically.</span>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1395,6 +1395,7 @@
       selectStatus:       'Status w\u00e4hlen',
       sprachtafelTitle:   'Sprachtafel Funk',
       natoTitle:          'NATO Alphabet',
+      medicalTitle:       'Medical-Notfallablauf',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1467,6 +1468,7 @@
       selectStatus:       'Select status',
       sprachtafelTitle:   'Radio Communication Table',
       natoTitle:          'NATO Alphabet',
+      medicalTitle:       'Medical emergency workflow',
       sprachtafel: [
         ['Kommen',        'Over'],
         ['Ende',          'Out'],
@@ -1539,6 +1541,7 @@
       selectStatus:       'Vybrat stav',
       sprachtafelTitle:   'Tabulka Spojen\u00ed',
       natoTitle:          'Abeceda NATO',
+      medicalTitle:       'Medical emergency workflow',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
         ['Ende',          'Konec'],
@@ -1613,7 +1616,6 @@
   let builtinColors   = {};  /* { id: {bg,color,border} } – overrides default colors for built-in statuses */
   let typeColors      = {};  /* { typeName: {bg,color,border} } – custom colors for event types */
   let medicalState    = null;
-  let medicalSaveTimer = null;
   const DEFAULT_STATUSES = ['active', 'base', 'kia', 'unknown'];
   const MEDICAL_FIELDS = [
     'medicalFrequency', 'medicalReportingUnit', 'medicalReceivingUnit', 'medicalCasualtyCount',
@@ -2090,8 +2092,6 @@
   function scheduleMedicalSave() {
     syncMedicalStateFromForm();
     renderMedicalPreview();
-    clearTimeout(medicalSaveTimer);
-    medicalSaveTimer = setTimeout(() => save(), 700);
   }
 
   function buildMedicalSummary() {
@@ -2138,18 +2138,15 @@
     const preview = document.getElementById('medicalPreview');
     if (!preview) return;
     const summary = buildMedicalSummary();
-    preview.innerHTML = `<strong>Auto log preview</strong>${escHtml(summary || 'Fill the fields to build the automatic medical log entry.')}`;
+    preview.innerHTML = `<strong>Auto log preview</strong> ${escHtml(summary || 'Fill the fields to build the automatic medical log entry.')}`;
   }
 
   function resetMedicalForm() {
-    clearTimeout(medicalSaveTimer);
     medicalState = createDefaultMedicalState();
     fillMedicalForm();
-    save();
   }
 
   function addMedicalLogEntry() {
-    clearTimeout(medicalSaveTimer);
     const summary = buildMedicalSummary();
     if (!summary) {
       document.getElementById('medicalWho')?.focus();
