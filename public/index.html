@@ -29,14 +29,13 @@
       --field:         #0f141b;
       --row-even:      #121821;
       --row-odd:       #0f141b;
-      --shadow:        0 10px 30px rgba(0,0,0,.18);
-      --hero-glow-stop: 34%;
+      --shadow:        0 10px 30px rgba(0,0,0,0.18);
     }
 
     body {
       margin: 0;
       background:
-        radial-gradient(circle at top, rgba(47,129,247,.09), transparent var(--hero-glow-stop)),
+        radial-gradient(circle at top, rgba(47,129,247,0.09), transparent 34%),
         linear-gradient(180deg, #0b1118 0%, var(--bg) 100%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -401,7 +400,7 @@
       position: relative;
       display: flex;
       flex-shrink: 0;
-      padding-right: 18px;
+      padding-right: 16px;
     }
 
     /* Gear toggle tab on the left edge */
@@ -1009,6 +1008,10 @@
     }
 
     /* scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) var(--bg);
+    }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
