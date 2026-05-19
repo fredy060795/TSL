@@ -2580,7 +2580,10 @@
   }
 
   function getMedicalUi() {
-    return (LANGS[lang] && LANGS[lang].medicalUi) || LANGS.de.medicalUi;
+    return (LANGS[lang] && LANGS[lang].medicalUi) ||
+           LANGS.de?.medicalUi ||
+           LANGS.en?.medicalUi ||
+           { fieldLabels: {}, placeholders: {}, selectOptions: {}, flags: {}, cards: [], summaryLabels: {} };
   }
 
   function setMedicalLabel(id, text) {
