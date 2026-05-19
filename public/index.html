@@ -1205,7 +1205,7 @@
 <div class="sprachtafel-panel notes-panel" id="notesPanel">
   <h3 data-i18n="notesTitle">Notizen</h3>
   <div class="notes-field">
-    <label for="notesInput" data-i18n="notesTitle">Notizen</label>
+    <label for="notesInput" data-i18n="notesLabel">Notizen</label>
     <textarea id="notesInput" data-i18n-ph="notesPlaceholder" placeholder="Freie Notizen..."></textarea>
   </div>
 </div>
@@ -1602,6 +1602,7 @@
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical-Notfallablauf',
       notesTitle:         'Notizen',
+      notesLabel:         'Notizfeld',
       notesPlaceholder:   'Freie Notizen…',
       sprachtafel: [
         ['Kommen',        'Over'],
@@ -1677,6 +1678,7 @@
       natoTitle:          'NATO Alphabet',
       medicalTitle:       'Medical emergency workflow',
       notesTitle:         'Notes',
+      notesLabel:         'Notes field',
       notesPlaceholder:   'Free notes…',
       sprachtafel: [
         ['Kommen',        'Over'],
@@ -1752,6 +1754,7 @@
       natoTitle:          'Abeceda NATO',
       medicalTitle:       'Medical emergency workflow',
       notesTitle:         'Poznámky',
+      notesLabel:         'Pole poznámek',
       notesPlaceholder:   'Volné poznámky…',
       sprachtafel: [
         ['Kommen',        'P\u0159ij\u00edjám'],
@@ -2027,7 +2030,7 @@
       const db   = await openDB();
       const tx   = db.transaction(IDB_STORE, 'readonly');
       const st   = tx.objectStore(IDB_STORE);
-      const [u, t, l, us, cs, bs, bl, bc, tc, nt, ts] = await Promise.all([
+      const [u, t, l, us, cs, bs, bl, bc, tc, notesTextData, ts] = await Promise.all([
         idbGet(st, 'units'),
         idbGet(st, 'types'),
         idbGet(st, 'log'),
@@ -2040,7 +2043,7 @@
         idbGet(st, 'notesText'),
         idbGet(st, 'lastSaved'),
       ]);
-      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, notesText: nt, lastSaved: ts };
+      return { units: u, types: t, log: l, unitStatuses: us, customStatuses: cs, builtinStatuses: bs, builtinLabels: bl, builtinColors: bc, typeColors: tc, notesText: notesTextData, lastSaved: ts };
     } catch(e) {
       console.error('IDB load failed:', e);
       return null;
