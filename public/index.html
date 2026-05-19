@@ -2658,7 +2658,25 @@
     return (LANGS[lang] && LANGS[lang].medicalUi) ||
            LANGS.de?.medicalUi ||
            LANGS.en?.medicalUi ||
-           { fieldLabels: {}, placeholders: {}, selectOptions: {}, flags: {}, cards: [], summaryLabels: {} };
+           {
+             buttonLabel: '',
+             buttonAria: '',
+             panelTitle: '',
+             panelSubtitle: '',
+             sections: [],
+             fieldLabels: {},
+             placeholders: {},
+             selectOptions: {},
+             flags: {},
+             cards: [],
+             previewTitle: '',
+             previewEmpty: '',
+             summaryStored: '',
+             resetButton: '',
+             resetTitle: '',
+             createLogButton: '',
+             summaryLabels: {},
+           };
   }
 
   function setMedicalLabel(id, text) {
@@ -2678,10 +2696,10 @@
   function setMedicalSelectOptions(id, labels) {
     const select = document.getElementById(id);
     if (!select || !labels) return;
-    Array.from(select.options).forEach(option => {
+    for (const option of select.options) {
       const key = option.value;
       if (labels[key] !== undefined) option.textContent = labels[key];
-    });
+    }
   }
 
   function getMedicalSelectText(id, value) {
@@ -2707,6 +2725,9 @@
       panelHeading.innerHTML = `<span>${escHtml(ui.panelTitle)}</span><span class="medical-subtitle">${escHtml(ui.panelSubtitle)}</span>`;
     }
 
+    if (ui.sections && ui.sections.length !== sectionHeadings.length) {
+      console.warn('Medical UI sections mismatch:', ui.sections.length, sectionHeadings.length);
+    }
     ui.sections?.forEach((title, index) => {
       if (sectionHeadings[index]) sectionHeadings[index].textContent = title;
     });
