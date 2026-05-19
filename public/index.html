@@ -13,8 +13,12 @@
       --panel-2:       #e8f0f8;
       --border:        #ccd8e6;
       --border-soft:   rgba(180, 194, 212, 0.72);
+      --accent-rgb:    18, 61, 116;
+      --accent-strong-rgb: 12, 47, 89;
+      --accent-border-rgb: 242, 140, 40;
       --accent:        #123d74;
       --accent-strong: #0c2f59;
+      --accent-deep:   #092442;
       --accent-border: #f28c28;
       --accent-soft:   rgba(18, 61, 116, 0.09);
       --accent-hover:  rgba(18, 61, 116, 0.13);
@@ -31,14 +35,15 @@
       --row-even:      #ffffff;
       --row-odd:       #f5f8fc;
       --shadow:        0 24px 54px rgba(18, 42, 71, 0.1);
-      --hero-glow:     rgba(18, 61, 116, 0.1);
-      --hero-radial-stop: 36%;
+      --hero-glow:     rgba(var(--accent-rgb), 0.1);
+      --hero-radial-stop: 34%;
       --eyebrow-spacing: 0.16em;
       --eyebrow-spacing-compact: 0.08em;
       --hero-tag-spacing: 0.04em;
       --hero-tag-spacing-mobile: 0.08em;
       --subtitle-spacing: 0.18em;
       --card-accent-height: 6px;
+      --section-accent-height: 4px;
       --content-max-width: 1600px;
       --page-gutter:   20px;
     }
@@ -62,7 +67,7 @@
       overflow: hidden;
       width: min(var(--content-max-width), calc(100% - (var(--page-gutter) * 2)));
       margin: var(--page-gutter) auto 16px;
-      background: linear-gradient(135deg, rgba(12, 47, 89, 0.98) 0%, rgba(18, 61, 116, 0.96) 58%, rgba(242, 140, 40, 0.22) 100%);
+      background: linear-gradient(135deg, rgba(var(--accent-strong-rgb), 0.98) 0%, rgba(var(--accent-rgb), 0.96) 58%, rgba(var(--accent-border-rgb), 0.22) 100%);
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 24px;
       box-shadow: 0 28px 60px rgba(11, 32, 57, 0.22);
@@ -78,7 +83,7 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at top right, rgba(242, 140, 40, 0.22), transparent 34%),
+        radial-gradient(circle at top right, rgba(var(--accent-border-rgb), 0.22), transparent 34%),
         linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 55%);
       pointer-events: none;
     }
@@ -1173,7 +1178,7 @@
     .lagebild,
     .entry-form,
     .log-section {
-      border-top: 4px solid var(--accent-border);
+      border-top: var(--section-accent-height) solid var(--accent-border);
       background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
     }
     .sidebar h2,
@@ -1190,7 +1195,7 @@
     }
     .btn-add-unit:hover,
     .btn-log:hover {
-      background: linear-gradient(135deg, var(--accent-strong) 0%, #092442 100%);
+      background: linear-gradient(135deg, var(--accent-strong) 0%, var(--accent-deep) 100%);
       box-shadow: 0 10px 26px var(--accent-shadow);
     }
     header .sprachtafel-btn,
